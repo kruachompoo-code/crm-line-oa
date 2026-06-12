@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองโต๊ะ</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f0f9ff;padding:20px 16px 40px}
+  h1{font-size:20px;font-weight:700;color:#1F4E79;margin-bottom:4px}
+  .sub{font-size:13px;color:#888;margin-bottom:20px}
+  .card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 8px rgba(0,0,0,.06);margin-bottom:16px}
+  label{display:block;font-size:13px;color:#666;margin-bottom:6px;margin-top:14px;font-weight:600}
+  label:first-child{margin-top:0}
+  select,input{width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fff;outline:none}
+  select:focus,input:focus{border-color:#1F4E79}
+  .party-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+  .party-btn{padding:10px;border:1.5px solid #e0e0e0;border-radius:10px;text-align:center;font-size:15px;cursor:pointer;transition:.2s}
+  .party-btn.selected{background:#1F4E79;color:#fff;border-color:#1F4E79}
+  .time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .time-btn{padding:10px;border:1.5px solid #e0e0e0;border-radius:10px;text-align:center;font-size:14px;cursor:pointer;transition:.2s}
+  .time-btn.selected{background:#1F4E79;color:#fff;border-color:#1F4E79}
+  .time-btn.disabled{opacity:.35;cursor:not-allowed}
+  .submit-btn{width:100%;padding:15px;background:#1F4E79;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0}
+  .status{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600}
+  .s-confirmed{background:#d1fae5;color:#065f46}
+  .s-pending{background:#fef3c7;color:#92400e}
+  .s-cancelled{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<h1>📅 จองโต๊ะ</h1>
+<p class="sub">จองล่วงหน้าเพื่อไม่ต้องรอ</p>
+
+<div class="card">
+  <label>สาขา</label>
+  <select id="branch">
+    <option value="1">สาขาสยาม</option>
+    <option value="2">สาขาอโศก</option>
+    <option value="3">สาขาลาดพร้าว</option>
+  </select>
+
+  <label>จำนวนคน</label>
+  <div class="party-grid" id="party-grid">
+    <div class="party-btn" onclick="selectParty(1)">1</div>
+    <div class="party-btn" onclick="selectParty(2)">2</div>
+    <div class="party-btn selected" onclick="selectParty(3)">3</div>
+    <div class="party-btn" onclick="selectParty(4)">4</div>
+    <div class="party-btn" onclick="selectParty(5)">5+</div>
+  </div>
+
+  <label>วันที่</label>
+  <input type="date" id="date" min="">
+
+  <label>เวลา</label>
+  <div class="time-grid" id="time-grid"></div>
+
+  <label>หมายเหตุ (ถ้ามี)</label>
+  <input type="text" id="notes" placeholder="เช่น ต้องการโต๊ะริมหน้าต่าง">
+</div>
+
+<button class="submit-btn" id="submitBtn" onclick="book()">✅ ยืนยันการจอง</button>
+
+<div class="card" style="margin-top:24px">
+  <h3 style="font-size:15px;font-weight:700;color:#333;margin-bottom:12px">การจองล่าสุด</h3>
+  <div id="booking-list"><div style="color:#ccc;text-align:center;padding:12px">ไม่มีการจอง</div></div>
+</div>
+
+<script>
+const TIMES = ['11:00','11:30','12:00','12:30','13:00','13:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00'];
+let partySize = 3, authToken = '';
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_BOOKING@@' });
+  if (!liff.isLoggedIn()) liff.login();
+
+  const { token } = await (await fetch('/api/auth/line', {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ idToken: liff.getIDToken() })
+  })).json();
+  authToken = token;
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('date').min = today;
+  document.getElementById('date').value = today;
+  renderTimes();
+
+  // Load existing bookings
+  const res = await fetch('/api/bookings', { headers:{'Authorization':'Bearer '+token} });
+  const { bookings } = await res.json();
+  const bl = document.getElementById('booking-list');
+  if (bookings && bookings.length) {
+    bl.innerHTML = bookings.slice(0,5).map(b => `
+      <div class="history-item">
+        <div>
+          <div style="font-size:14px;font-weight:600">${new Date(b.booking_date).toLocaleDateString('th-TH')} ${b.booking_time}</div>
+          <div style="font-size:12px;color:#888">${b.party_size} คน</div>
+        </div>
+        <span class="status s-${b.status}">${statusTH(b.status)}</span>
+      </div>`).join('');
+  }
+}
+
+function renderTimes() {
+  const grid = document.getElementById('time-grid');
+  grid.innerHTML = TIMES.map((t,i) => `
+    <div class="time-btn${i===0?' selected':''}" onclick="selectTime(this,'${t}')">${t}</div>`).join('');
+}
+
+function selectParty(n) {
+  partySize = n;
+  document.querySelectorAll('.party-btn').forEach((b,i) => b.classList.toggle('selected', i===n-1));
+}
+
+function selectTime(el, time) {
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function book() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'กำลังจอง...';
+  const selectedTime = document.querySelector('.time-btn.selected')?.textContent;
+  if (!selectedTime) { alert('กรุณาเลือกเวลา'); btn.disabled=false; btn.textContent='✅ ยืนยันการจอง'; return; }
+  try {
+    const res = await fetch('/api/bookings', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({
+        branchId: document.getElementById('branch').value,
+        partySize,
+        bookingDate: document.getElementById('date').value,
+        bookingTime: selectedTime,
+        notes: document.getElementById('notes').value
+      })
+    });
+    if (res.ok) { alert('จองสำเร็จ! ✅ คุณจะได้รับการยืนยันทาง LINE'); liff.closeWindow(); }
+    else { alert('เกิดข้อผิดพลาด กรุณาลองใหม่'); }
+  } catch(e) { alert('เกิดข้อผิดพลาด'); }
+  btn.disabled = false; btn.textContent = '✅ ยืนยันการจอง';
+}
+
+function statusTH(s) {
+  return {confirmed:'ยืนยันแล้ว',pending:'รอยืนยัน',cancelled:'ยกเลิก'}[s] || s;
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
