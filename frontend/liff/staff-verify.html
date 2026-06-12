@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Verify — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh}
+
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:18px 20px;text-align:center}
+.header h1{font-size:18px;font-weight:800;margin-bottom:4px}
+.header p{font-size:12px;opacity:.7}
+.staff-badge{display:inline-block;background:var(--blue);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-top:8px}
+
+.card{background:#fff;border-radius:20px;margin:20px 16px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.section-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:14px;color:var(--sub)}
+.info-value{font-size:16px;font-weight:700;color:var(--text)}
+.info-value.big{font-size:22px;color:var(--pink)}
+.info-value.table{font-size:28px;color:var(--blue)}
+
+.order-items{background:#fff;border-radius:20px;margin:0 16px 16px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.order-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.order-row:last-child{border-bottom:none}
+.order-name{flex:1;color:var(--text)}
+.order-amt{font-weight:700;color:var(--pink)}
+
+.action-area{padding:0 16px 32px}
+.action-btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+.action-btn:active{transform:scale(.97)}
+.btn-confirm{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff}
+.btn-add{background:linear-gradient(135deg,var(--blue),#0ea5e9);color:#fff}
+.btn-cancel{background:#f1f5f9;color:var(--sub)}
+
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700}
+.badge-pending{background:#fef3c7;color:#d97706}
+.badge-verified{background:#dcfce7;color:#16a34a}
+
+.success-screen{text-align:center;padding:60px 24px}
+.success-icon{font-size:80px;margin-bottom:20px}
+.success-title{font-size:24px;font-weight:800;color:var(--green);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.7}
+
+.loading{text-align:center;padding:80px 20px;color:var(--sub)}
+.loader{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.error-screen{text-align:center;padding:60px 24px}
+.error-icon{font-size:64px;margin-bottom:16px}
+.error-title{font-size:20px;font-weight:800;color:#ef4444;margin-bottom:8px}
+.error-sub{font-size:14px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🔍 Staff Verify</h1>
+  <p>ตรวจสอบบิลก่อนรับเงิน</p>
+  <div class="staff-badge" id="staffBadge">👤 โหลด...</div>
+</div>
+
+<div id="content">
+  <div class="loading"><div class="loader"></div><p>กำลังโหลดข้อมูล...</p></div>
+</div>
+
+<script>
+const API='/api';
+let token='',staffId='',orderData=null;
+
+async function callAPI(method,path,body){
+  const jwt=localStorage.getItem('liff_token')||'';
+  const res=await fetch(API+path,{method,headers:{'Content-Type':'application/json','Authorization':'Bearer '+jwt},body:body?JSON.stringify(body):undefined});
+  return res.json();
+}
+
+async function init(){
+  const params=new URLSearchParams(location.search);
+  token=params.get('token');
+  if(!token){showError('ไม่พบ Token','ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว');return;}
+
+  try{
+    await liff.init({liffId:window.__LIFF_STAFF_VERIFY__||'PLACEHOLDER_STAFF_VERIFY_LIFF_ID'});
+    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
+    const profile=await liff.getProfile();
+    staffId=profile.userId;
+    document.getElementById('staffBadge').textContent='👤 '+profile.displayName;
+  }catch(e){staffId='staff_preview';document.getElementById('staffBadge').textContent='👤 Preview Mode';}
+
+  loadOrder();
+}
+
+async function loadOrder(){
+  try{
+    const res=await callAPI('POST','/bookings/walkin/verify-bill',{token,staffId,action:'preview'});
+    if(res.error){showError('Token หมดอายุ',res.error);return;}
+    orderData=res.order;
+    renderOrder(orderData);
+  }catch(e){showError('เชื่อมต่อไม่ได้',e.message);}
+}
+
+function renderOrder(order){
+  const items=order.items||[];
+  const total=order.total_amount||items.reduce((s,i)=>s+(i.unit_price*i.quantity),0);
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="section-label">ข้อมูลโต๊ะ</div>
+      <div class="info-row">
+        <span class="info-label">เลขโต๊ะ</span>
+        <span class="info-value table">โต๊ะ ${order.table_number||'—'}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">สาขา</span>
+        <span class="info-value">${order.branch_id||'—'}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">สถานะ</span>
+        <span class="status-badge badge-pending">⏳ รอ Verify</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">ยอดรวม</span>
+        <span class="info-value big">฿${Number(total).toLocaleString('th-TH')}</span>
+      </div>
+    </div>
+
+    <div class="order-items">
+      <div class="section-label">รายการอาหาร</div>
+      ${items.length
+        ? items.map(i=>`<div class="order-row"><span class="order-name">${i.name} × ${i.quantity}</span><span class="order-amt">฿${(i.unit_price*i.quantity).toLocaleString('th-TH')}</span></div>`).join('')
+        : '<div style="color:#aaa;font-size:14px;padding:8px 0">ไม่มีรายการ</div>'
+      }
+      ${order.notes?`<div style="background:#f8f9fa;border-radius:8px;padding:10px;margin-top:12px;font-size:13px;color:#666">📝 หมายเหตุ: ${order.notes}</div>`:''}
+    </div>
+
+    <div class="action-area">
+      <button class="action-btn btn-confirm" onclick="confirmBill()">
+        ✅ ยืนยันบิล — รับเงินได้เลย
+      </button>
+      <button class="action-btn btn-add" onclick="addItem()">
+        ➕ ลูกค้าสั่งเพิ่ม
+      </button>
+      <button class="action-btn btn-cancel" onclick="window.close?.() || history.back()">
+        ← กลับ
+      </button>
+    </div>`;
+}
+
+async function confirmBill(){
+  const btn=document.querySelector('.btn-confirm');
+  btn.disabled=true;btn.textContent='⏳ กำลังยืนยัน...';
+  try{
+    const res=await callAPI('POST','/bookings/walkin/verify-bill',{token,staffId,action:'confirm'});
+    if(res.error)throw new Error(res.error);
+    showSuccessScreen(orderData);
+  }catch(e){
+    showError('เกิดข้อผิดพลาด',e.message);
+  }
+}
+
+function addItem(){
+  showToast('ให้ลูกค้าสแกน QR โต๊ะใหม่เพื่อสั่งเพิ่ม');
+}
+
+function showSuccessScreen(order){
+  const total=order?.total_amount||0;
+  document.getElementById('content').innerHTML=`
+    <div class="success-screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Verify สำเร็จ!</div>
+      <div class="success-sub">
+        บิลโต๊ะ ${order?.table_number||'—'} ยืนยันแล้ว<br>
+        <strong style="color:var(--pink);font-size:22px">฿${Number(total).toLocaleString('th-TH')}</strong><br>
+        รับเงินได้เลย 🎉
+      </div>
+    </div>`;
+}
+
+function showError(title,msg){
+  document.getElementById('content').innerHTML=`
+    <div class="error-screen">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title">${title}</div>
+      <div class="error-sub">${msg}</div>
+    </div>`;
+}
+
+let _toast;
+function showToast(msg){
+  clearTimeout(_toast);
+  let el=document.getElementById('t');
+  if(!el){el=document.createElement('div');el.id='t';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999';document.body.appendChild(el);}
+  el.textContent=msg;el.style.opacity='1';
+  _toast=setTimeout(()=>{el.style.opacity='0';},2500);
+}
+
+window.addEventListener('load',()=>{try{init();}catch(e){showError('โหลดไม่ได้',e.message);}});
+</script>
+</body>
+</html>
