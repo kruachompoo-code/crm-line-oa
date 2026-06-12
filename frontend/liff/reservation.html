@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองโต๊ะล่วงหน้า</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f0f4f8;padding-bottom:40px}
+  .header{background:linear-gradient(135deg,#4dc8f4,#2E86C1);padding:20px 16px 28px;color:#fff}
+  .header h1{font-size:20px;font-weight:800;margin-bottom:4px}
+  .header p{font-size:13px;opacity:.8}
+  .step-bar{display:flex;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:99}
+  .step{flex:1;padding:14px 4px;text-align:center;font-size:12px;color:#aaa;cursor:pointer;border-bottom:2px solid transparent}
+  .step.active{color:#4dc8f4;border-bottom-color:#4dc8f4;font-weight:700}
+  .step.done{color:#27AE60}
+  .page{padding:16px;display:none} .page.active{display:block}
+  .card{background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+  label{display:block;font-size:13px;color:#666;margin-bottom:5px;margin-top:12px;font-weight:600}
+  label:first-child{margin-top:0}
+  select,input{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;background:#fff}
+  .party-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
+  .party-btn{padding:10px 4px;border:1.5px solid #e0e0e0;border-radius:10px;text-align:center;font-size:14px;cursor:pointer}
+  .party-btn.sel{background:#4dc8f4;color:#fff;border-color:#4dc8f4}
+  .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+  .time-btn{padding:10px 4px;border:1.5px solid #e0e0e0;border-radius:10px;text-align:center;font-size:12px;cursor:pointer}
+  .time-btn.sel{background:#4dc8f4;color:#fff;border-color:#4dc8f4}
+
+  /* Menu selector */
+  .menu-item-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;gap:10px}
+  .menu-emoji{font-size:24px;width:36px;text-align:center}
+  .menu-info{flex:1}
+  .menu-name{font-size:14px;font-weight:600}
+  .menu-price{font-size:13px;color:#4dc8f4;font-weight:700}
+  .qty-ctrl{display:flex;align-items:center;gap:8px}
+  .qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid #4dc8f4;background:#fff;color:#4dc8f4;font-size:16px;cursor:pointer;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .qty-num{font-size:14px;font-weight:700;min-width:18px;text-align:center}
+
+  /* Deposit summary */
+  .deposit-box{background:#e8f4fd;border-radius:14px;padding:16px;margin-bottom:12px}
+  .deposit-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+  .deposit-total{font-size:20px;font-weight:800;color:#4dc8f4}
+  .highlight-box{background:#fff3cd;border-radius:12px;padding:12px;font-size:13px;color:#856404;margin-bottom:12px;line-height:1.6}
+
+  /* Payment mock */
+  .pay-option{border:1.5px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+  .pay-option.sel{border-color:#4dc8f4;background:#f0f6ff}
+  .pay-icon{font-size:28px}
+  .pay-name{font-size:14px;font-weight:600}
+  .pay-desc{font-size:12px;color:#999}
+
+  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px}
+  .btn-primary{background:#4dc8f4;color:#fff}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-outline{background:#fff;color:#4dc8f4;border:1.5px solid #4dc8f4}
+
+  .success-screen{text-align:center;padding:40px 20px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📅 จองโต๊ะล่วงหน้า</h1>
+  <p>เลือกเมนูและชำระมัดจำ 50% เพื่อยืนยันการจอง</p>
+</div>
+
+<div class="step-bar">
+  <div class="step active" id="s1">1. ข้อมูลการจอง</div>
+  <div class="step" id="s2">2. เลือกเมนู</div>
+  <div class="step" id="s3">3. ชำระมัดจำ</div>
+</div>
+
+<!-- STEP 1: Booking details -->
+<div class="page active" id="page1">
+  <div class="card">
+    <label>สาขา</label>
+    <select id="branch">
+      <option value="1">สาขาสยาม</option>
+      <option value="2">สาขาอโศก</option>
+      <option value="3">สาขาลาดพร้าว</option>
+    </select>
+    <label>จำนวนคน (1–5 ท่าน)</label>
+    <div class="party-grid">
+      <div class="party-btn" onclick="setParty(1,this)">1</div>
+      <div class="party-btn sel" onclick="setParty(2,this)">2</div>
+      <div class="party-btn" onclick="setParty(3,this)">3</div>
+      <div class="party-btn" onclick="setParty(4,this)">4</div>
+      <div class="party-btn" onclick="setParty(5,this)">5</div>
+    </div>
+    <label>วันที่จอง</label>
+    <input type="date" id="date" min="">
+    <label>เวลา</label>
+    <div class="time-grid" id="time-grid"></div>
+    <label>หมายเหตุ</label>
+    <input type="text" id="notes" placeholder="เช่น โต๊ะใกล้หน้าต่าง, แพ้อาหาร">
+  </div>
+  <button class="btn btn-primary" onclick="goStep2()">เลือกเมนูที่สั่ง →</button>
+</div>
+
+<!-- STEP 2: Pre-order menu -->
+<div class="page" id="page2">
+  <div class="card">
+    <div style="font-size:13px;color:#666;margin-bottom:12px;line-height:1.6">
+      📋 <b>กรุณาเลือกเมนูที่ต้องการสั่ง</b><br>
+      ยอดรวมนี้จะใช้คำนวณมัดจำ 50% — ชำระส่วนที่เหลือที่ร้านในวันจริง
+    </div>
+    <div id="menu-list"></div>
+  </div>
+  <div class="deposit-box" id="deposit-preview" style="display:none">
+    <div class="deposit-row"><span>ยอดรวมเมนู</span><span id="dp-total">฿0</span></div>
+    <div class="deposit-row"><span>มัดจำ 50%</span><span id="dp-deposit" style="font-weight:800;color:#4dc8f4">฿0</span></div>
+    <div class="deposit-row"><span style="color:#27AE60">ชำระที่ร้าน (ส่วนที่เหลือ)</span><span id="dp-remaining">฿0</span></div>
+  </div>
+  <button class="btn btn-primary" id="to-pay-btn" onclick="goStep3()" disabled>ดำเนินการชำระมัดจำ →</button>
+  <button class="btn btn-outline" onclick="goStep(1)" style="margin-top:8px">← กลับ</button>
+</div>
+
+<!-- STEP 3: Payment -->
+<div class="page" id="page3">
+  <div class="card">
+    <div class="highlight-box">
+      ⚡ ชำระมัดจำ <b id="pay-amount">฿0</b> เพื่อยืนยันการจอง<br>
+      ส่วนที่เหลือ <b id="pay-remaining">฿0</b> ชำระที่ร้านในวันจริง
+    </div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px">เลือกวิธีชำระ</div>
+    <div class="pay-option sel" id="pay-linepay" onclick="selectPay('linepay')">
+      <div class="pay-icon">💚</div>
+      <div><div class="pay-name">LINE Pay</div><div class="pay-desc">ชำระด้วย LINE Pay</div></div>
+    </div>
+    <div class="pay-option" id="pay-card" onclick="selectPay('card')">
+      <div class="pay-icon">💳</div>
+      <div><div class="pay-name">บัตรเครดิต / เดบิต</div><div class="pay-desc">Visa, Mastercard, JCB</div></div>
+    </div>
+    <div class="pay-option" id="pay-promptpay" onclick="selectPay('promptpay')">
+      <div class="pay-icon">🏦</div>
+      <div><div class="pay-name">PromptPay</div><div class="pay-desc">โอนผ่าน QR พร้อมเพย์</div></div>
+    </div>
+  </div>
+
+  <!-- PromptPay QR -->
+  <div class="card" id="promptpay-qr" style="display:none;text-align:center">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px">สแกน QR เพื่อชำระ</div>
+    <div id="pp-qr-img" style="background:#f5f5f5;width:180px;height:180px;margin:0 auto 12px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:40px">📱</div>
+    <div style="font-size:13px;color:#888">โอนแล้วกดยืนยันด้านล่าง</div>
+    <input type="text" id="pp-slip-ref" placeholder="เลขอ้างอิงการโอน" style="margin-top:12px;padding:10px;border:1.5px solid #ddd;border-radius:10px;width:100%;font-size:14px">
+  </div>
+
+  <button class="btn btn-primary" id="pay-btn" onclick="processPayment()">✅ ยืนยันการชำระ</button>
+  <button class="btn btn-outline" onclick="goStep(2)" style="margin-top:8px">← กลับ</button>
+</div>
+
+<!-- SUCCESS -->
+<div class="page" id="page-success">
+  <div class="success-screen">
+    <div style="font-size:72px;margin-bottom:16px">🎉</div>
+    <h2 style="font-size:22px;font-weight:800;color:#4dc8f4;margin-bottom:8px">จองสำเร็จ!</h2>
+    <p style="color:#666;line-height:1.8;margin-bottom:20px">ระบบส่งการยืนยันทาง LINE แล้ว<br>กรุณามาตรงเวลาที่จอง</p>
+    <div class="deposit-box" style="text-align:left">
+      <div class="deposit-row"><span>📅 วันที่</span><span id="s-date">—</span></div>
+      <div class="deposit-row"><span>⏰ เวลา</span><span id="s-time">—</span></div>
+      <div class="deposit-row"><span>👥 จำนวน</span><span id="s-party">—</span></div>
+      <div class="deposit-row"><span>💰 มัดจำที่ชำระ</span><span id="s-deposit">—</span></div>
+      <div class="deposit-row"><span style="color:#27AE60">💳 ค้างชำระที่ร้าน</span><span id="s-remaining">—</span></div>
+    </div>
+    <button class="btn btn-outline" onclick="liff.closeWindow()" style="margin-top:8px">ปิด</button>
+  </div>
+</div>
+
+<script>
+const TIMES = ['11:00','11:30','12:00','12:30','13:00','13:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'];
+const MENU = [
+  {id:1,name:'สเต็กเนื้อออสเตรเลีย',price:389,cat:'main',emoji:'🥩'},
+  {id:2,name:'ปลาแซลมอนย่าง',price:299,cat:'main',emoji:'🐟'},
+  {id:3,name:'สลัดซีฟู้ด',price:199,cat:'appetizer',emoji:'🥗'},
+  {id:4,name:'ชาเย็นไทย',price:89,cat:'drink',emoji:'🧋'},
+  {id:5,name:'ฝักทองแกงบวช',price:79,cat:'dessert',emoji:'🍮'},
+  {id:6,name:'ไก่ทอดกระเทียม',price:149,cat:'main',emoji:'🍗'},
+  {id:7,name:'ต้มยำกุ้ง',price:249,cat:'main',emoji:'🍲'},
+  {id:8,name:'น้ำส้มคั้นสด',price:69,cat:'drink',emoji:'🍊'},
+];
+
+let partySize=2, cart={}, payMethod='linepay', authToken='', bookingResult=null;
+let depositAmt=0, remainingAmt=0;
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_RESERVATION@@' });
+  if (!liff.isLoggedIn()) liff.login();
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('date').min = today;
+  document.getElementById('date').value = new Date(Date.now()+86400000).toISOString().slice(0,10);
+
+  // Times
+  document.getElementById('time-grid').innerHTML = TIMES.map((t,i)=>
+    `<div class="time-btn${i===0?' sel':''}" onclick="selectTime(this,'${t}')">${t}</div>`
+  ).join('');
+
+  // Menu list
+  document.getElementById('menu-list').innerHTML = MENU.map(m=>`
+    <div class="menu-item-row">
+      <div class="menu-emoji">${m.emoji}</div>
+      <div class="menu-info">
+        <div class="menu-name">${m.name}</div>
+        <div class="menu-price">฿${m.price}</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${m.id},-1)">−</button>
+        <div class="qty-num" id="mq-${m.id}">0</div>
+        <button class="qty-btn" onclick="changeQty(${m.id},1)">+</button>
+      </div>
+    </div>`).join('');
+
+  const { token } = await (await fetch('/api/auth/line', {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ idToken: liff.getIDToken() })
+  })).json();
+  authToken = token;
+}
+
+function setParty(n,el) {
+  partySize=n;
+  document.querySelectorAll('.party-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function selectTime(el) {
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id]||0)+delta);
+  if (!cart[id]) delete cart[id];
+  document.getElementById('mq-'+id).textContent = cart[id]||0;
+  updateDepositPreview();
+}
+
+function updateDepositPreview() {
+  const total = Object.entries(cart).reduce((s,[id,qty])=>s+MENU.find(m=>m.id==id).price*qty,0);
+  depositAmt  = Math.ceil(total*0.5);
+  remainingAmt = total - depositAmt;
+  const show = total > 0;
+  document.getElementById('deposit-preview').style.display = show?'block':'none';
+  document.getElementById('to-pay-btn').disabled = !show;
+  if (show) {
+    document.getElementById('dp-total').textContent    = '฿'+total.toLocaleString();
+    document.getElementById('dp-deposit').textContent  = '฿'+depositAmt.toLocaleString();
+    document.getElementById('dp-remaining').textContent= '฿'+remainingAmt.toLocaleString();
+  }
+}
+
+function goStep2() {
+  const time = document.querySelector('.time-btn.sel')?.textContent;
+  if (!document.getElementById('date').value || !time) { alert('กรุณาเลือกวันที่และเวลา'); return; }
+  goStep(2);
+}
+
+function goStep3() {
+  document.getElementById('pay-amount').textContent = '฿'+depositAmt.toLocaleString();
+  document.getElementById('pay-remaining').textContent = '฿'+remainingAmt.toLocaleString();
+  goStep(3);
+}
+
+function goStep(n) {
+  ['page1','page2','page3','page-success'].forEach(p=>document.getElementById(p).classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+  ['s1','s2','s3'].forEach((s,i)=>{
+    const el=document.getElementById(s);
+    el.className='step'+(i+1<n?' done':i+1===n?' active':'');
+  });
+  window.scrollTo(0,0);
+}
+
+function selectPay(method) {
+  payMethod = method;
+  ['linepay','card','promptpay'].forEach(m=>{
+    document.getElementById('pay-'+m).classList.toggle('sel', m===method);
+  });
+  document.getElementById('promptpay-qr').style.display = method==='promptpay'?'block':'none';
+}
+
+async function processPayment() {
+  const btn = document.getElementById('pay-btn');
+  btn.disabled=true; btn.textContent='กำลังดำเนินการ...';
+
+  const preOrderItems = Object.entries(cart).map(([id,qty])=>{
+    const m = MENU.find(x=>x.id==id);
+    return { menuItemId:m.id, name:m.name, unitPrice:m.price, quantity:qty };
+  });
+
+  try {
+    // 1. Create reservation
+    const resRes = await fetch('/api/bookings/reservation', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({
+        branchId: document.getElementById('branch').value,
+        partySize,
+        bookingDate: document.getElementById('date').value,
+        bookingTime: document.querySelector('.time-btn.sel')?.textContent,
+        notes: document.getElementById('notes').value,
+        preOrderItems
+      })
+    });
+    const resData = await resRes.json();
+    if (!resData.success) throw new Error(resData.error);
+    bookingResult = resData;
+
+    // 2. Simulate payment (in production: integrate LINE Pay / Omise)
+    const txRef = 'TXN'+Date.now();
+    await fetch(`/api/bookings/reservation/${resData.booking.id}/deposit`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ txRef })
+    });
+
+    // 3. Show success
+    document.getElementById('s-date').textContent     = resData.booking.booking_date;
+    document.getElementById('s-time').textContent     = resData.booking.booking_time;
+    document.getElementById('s-party').textContent    = partySize+' ท่าน';
+    document.getElementById('s-deposit').textContent  = '฿'+resData.depositAmount?.toLocaleString();
+    document.getElementById('s-remaining').textContent= '฿'+resData.remaining?.toLocaleString();
+    ['page1','page2','page3'].forEach(p=>document.getElementById(p).classList.remove('active'));
+    document.getElementById('page-success').classList.add('active');
+  } catch(e) {
+    btn.disabled=false; btn.textContent='✅ ยืนยันการชำระ';
+    alert('เกิดข้อผิดพลาด: '+e.message);
+  }
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
