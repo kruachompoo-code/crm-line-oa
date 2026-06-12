@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมัครสมาชิก — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f0f9ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+  .card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+  h1{font-size:22px;font-weight:700;color:#4dc8f4;margin-bottom:8px;text-align:center}
+  p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px;line-height:1.6}
+  .avatar{width:80px;height:80px;border-radius:50%;display:block;margin:0 auto 16px;object-fit:cover;border:3px solid #4dc8f4}
+  label{display:block;font-size:13px;color:#555;margin-bottom:4px;margin-top:12px}
+  input{width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;outline:none;transition:border .2s}
+  input:focus{border-color:#4dc8f4}
+  .btn{width:100%;padding:14px;background:linear-gradient(135deg,#4dc8f4,#e6538d);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:20px;transition:opacity .2s}
+  .btn:hover{opacity:.9}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .error{color:#e53e3e;font-size:13px;margin-top:8px}
+  .badge{background:#e8f4fd;color:#4dc8f4;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:16px}
+  .step{display:flex;gap:8px;justify-content:center;margin-bottom:24px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#ddd}
+  .dot.active{background:#4dc8f4}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="step"><div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+  <div id="step1">
+    <img id="avatar" class="avatar" src="https://via.placeholder.com/80" alt="profile">
+    <h1>🦀 ครัวชมพู่ อ่างศิลา!</h1>
+    <p class="sub">สมัครสมาชิกเพื่อรับสิทธิ์พิเศษ<br>และสะสมคะแนนทุกการสั่งอาหาร</p>
+    <div class="badge">🎁 รับคูปองทันที 20 บาท</div>
+    <label>ชื่อ-นามสกุล *</label>
+    <input type="text" id="name" placeholder="กรอกชื่อของคุณ">
+    <label>เบอร์โทรศัพท์ *</label>
+    <input type="tel" id="phone" placeholder="08x-xxx-xxxx" maxlength="10">
+    <label>วันเกิด</label>
+    <input type="date" id="birthday" max="">
+    <div class="error" id="err1"></div>
+    <button class="btn" id="nextBtn" onclick="goStep2()">ถัดไป →</button>
+  </div>
+
+  <div id="step2" style="display:none">
+    <h1>รหัสแนะนำ</h1>
+    <p class="sub">มีรหัสจากเพื่อน? กรอกเพื่อรับคะแนนพิเศษทั้งคู่!</p>
+    <label>รหัสแนะนำ (ถ้ามี)</label>
+    <input type="text" id="referral" placeholder="เช่น ABC123" style="text-transform:uppercase">
+    <button class="btn" onclick="goStep3()">ถัดไป →</button>
+    <button class="btn" style="background:#f0f0f0;color:#333;margin-top:8px" onclick="goStep3()">ข้ามขั้นตอนนี้</button>
+  </div>
+
+  <div id="step3" style="display:none">
+    <h1>เสร็จแล้ว! 🎉</h1>
+    <p class="sub">ยืนยันการสมัครสมาชิก</p>
+    <div id="summary" style="background:#f8f9fa;border-radius:12px;padding:16px;margin:16px 0;font-size:14px;line-height:2"></div>
+    <button class="btn" id="submitBtn" onclick="submit()">สมัครสมาชิก</button>
+  </div>
+</div>
+
+<script>
+let liffProfile = {};
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_ONBOARDING@@' });
+  if (!liff.isLoggedIn()) liff.login();
+  liffProfile = await liff.getProfile();
+  document.getElementById('avatar').src = liffProfile.pictureUrl;
+  document.getElementById('name').value = liffProfile.displayName;
+  document.getElementById('birthday').max = new Date().toISOString().slice(0,10);
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('utm_source')) sessionStorage.setItem('utm', location.search);
+}
+
+function goStep2() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  if (!name || !phone || !/^0[689]\d{8}$/.test(phone)) {
+    document.getElementById('err1').textContent = 'กรุณากรอกชื่อและเบอร์โทรให้ถูกต้อง (10 หลัก)';
+    return;
+  }
+  document.getElementById('err1').textContent = '';
+  show('step2'); setDot(1);
+}
+
+function goStep3() {
+  const data = {
+    name: document.getElementById('name').value,
+    phone: document.getElementById('phone').value,
+    birthday: document.getElementById('birthday').value,
+    referral: document.getElementById('referral').value.toUpperCase()
+  };
+  document.getElementById('summary').innerHTML = `
+    <b>ชื่อ:</b> ${data.name}<br>
+    <b>เบอร์:</b> ${data.phone}<br>
+    ${data.birthday ? `<b>วันเกิด:</b> ${data.birthday}<br>` : ''}
+    ${data.referral ? `<b>รหัสแนะนำ:</b> ${data.referral}` : ''}
+  `;
+  show('step3'); setDot(2);
+}
+
+async function submit() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'กำลังสมัคร...';
+  try {
+    const idToken = liff.getIDToken();
+    // Exchange for system JWT
+    const authRes = await fetch('/api/auth/line', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ idToken, branchId: getBranchId(), qrRef: getQRRef() })
+    });
+    const { token } = await authRes.json();
+
+    await fetch('/api/members/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({
+        lineUserId: liffProfile.userId,
+        displayName: liffProfile.displayName,
+        pictureUrl:  liffProfile.pictureUrl,
+        name:     document.getElementById('name').value,
+        phone:    document.getElementById('phone').value,
+        birthday: document.getElementById('birthday').value,
+        referralCode: document.getElementById('referral').value.toUpperCase(),
+        branchId: getBranchId()
+      })
+    });
+    liff.closeWindow();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+function show(id) {
+  ['step1','step2','step3'].forEach(s => document.getElementById(s).style.display = s===id?'block':'none');
+}
+function setDot(n) {
+  ['d1','d2','d3'].forEach((d,i) => {
+    document.getElementById(d).className = 'dot' + (i<=n?' active':'');
+  });
+}
+function getBranchId() {
+  return new URLSearchParams(location.search).get('branch') || '1';
+}
+function getQRRef() {
+  return new URLSearchParams(location.search).get('ref') || null;
+}
+
+init();
+</script>
+</body>
+</html>
