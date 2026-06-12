@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',Segoe UI,sans-serif;background:#f0f4f8;color:#222;display:flex;min-height:100vh}
+
+  /* Sidebar */
+  .sidebar{width:220px;background:#1F4E79;color:#fff;padding:0;display:flex;flex-direction:column;flex-shrink:0}
+  .sidebar-logo{padding:24px 20px 20px;font-size:18px;font-weight:800;border-bottom:1px solid rgba(255,255,255,.1)}
+  .sidebar-logo span{font-size:11px;font-weight:400;opacity:.6;display:block;margin-top:2px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:13px 20px;font-size:14px;cursor:pointer;transition:.2s;border-left:3px solid transparent}
+  .nav-item:hover{background:rgba(255,255,255,.08)}
+  .nav-item.active{background:rgba(255,255,255,.12);border-left-color:#FFD700}
+  .nav-section{padding:16px 20px 6px;font-size:11px;opacity:.45;text-transform:uppercase;letter-spacing:.5px}
+
+  /* Main */
+  .main{flex:1;overflow-y:auto}
+  .topbar{background:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
+  .topbar h2{font-size:20px;font-weight:700;color:#1F4E79}
+  .branch-select{padding:8px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;background:#f8f9fa}
+  .content{padding:24px 28px}
+
+  /* KPI cards */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .kpi{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.05);border-left:4px solid}
+  .kpi.blue{border-color:#1F4E79} .kpi.green{border-color:#27AE60} .kpi.orange{border-color:#E67E22} .kpi.red{border-color:#E74C3C}
+  .kpi-label{font-size:12px;color:#999;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .kpi-value{font-size:30px;font-weight:800;color:#222}
+  .kpi-sub{font-size:12px;color:#aaa;margin-top:4px}
+  .kpi-change{font-size:12px;font-weight:700;margin-top:6px}
+  .kpi-change.up{color:#27AE60} .kpi-change.down{color:#E74C3C}
+
+  /* Charts row */
+  .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+  .chart-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+  .chart-title{font-size:15px;font-weight:700;color:#333;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .chart-wrap{position:relative;height:220px}
+
+  /* Tables */
+  .table-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:10px 12px;background:#f8f9fa;color:#888;font-weight:600;font-size:12px;border-bottom:1px solid #eee}
+  td{padding:10px 12px;border-bottom:1px solid #f5f5f5}
+  tr:hover td{background:#fafbff}
+  .segment-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .seg-vip{background:#fde8ff;color:#7b2d8b} .seg-loyal{background:#d1fae5;color:#065f46}
+  .seg-risk{background:#fef3c7;color:#92400e} .seg-lost{background:#fee2e2;color:#991b1b}
+  .seg-new{background:#e0f2fe;color:#075985}
+  .tier-pill{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .tier-silver{background:#e8e8e8;color:#555} .tier-gold{background:#fff3cd;color:#856404} .tier-platinum{background:#e8f4fd;color:#1F4E79}
+
+  /* Page visibility */
+  .page{display:none} .page.active{display:block}
+
+  /* Campaign section */
+  .btn{padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer}
+  .btn-primary{background:#1F4E79;color:#fff}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .campaign-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 5px rgba(0,0,0,.05);display:flex;justify-content:space-between;align-items:center}
+  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .dot-active{background:#27AE60} .dot-draft{background:#aaa} .dot-done{background:#1F4E79}
+
+  /* QR section */
+  .qr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .qr-card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 5px rgba(0,0,0,.05);text-align:center}
+  .qr-img{width:120px;height:120px;border-radius:8px;object-fit:contain;margin:0 auto 10px;display:block;background:#f0f4f8}
+  .qr-label{font-weight:700;font-size:14px;color:#1F4E79}
+  .qr-scans{font-size:22px;font-weight:800;color:#222;margin:4px 0}
+  .qr-sub{font-size:12px;color:#aaa}
+
+  .badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .badge-card{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .badge-icon{font-size:32px;margin-bottom:6px}
+  .badge-count{font-size:22px;font-weight:800;color:#1F4E79}
+  .badge-name{font-size:12px;color:#888;margin-top:2px}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">🍽️ CRM Dashboard<span>LINE OA Restaurant</span></div>
+  <div class="nav-section">ภาพรวม</div>
+  <div class="nav-item active" onclick="showPage('overview',this)">📊 ภาพรวม</div>
+  <div class="nav-item" onclick="showPage('members',this)">👥 สมาชิก & RFM</div>
+  <div class="nav-section">การตลาด</div>
+  <div class="nav-item" onclick="showPage('campaigns',this)">📨 Campaigns</div>
+  <div class="nav-item" onclick="showPage('qr',this)">📱 UTM QR Codes</div>
+  <div class="nav-section">ระบบ</div>
+  <div class="nav-item" onclick="showPage('gamification',this)">🏆 Gamification</div>
+  <div class="nav-item" onclick="showPage('bookings',this)">📅 การจอง</div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h2 id="page-title">📊 ภาพรวม</h2>
+    <div style="display:flex;align-items:center;gap:12px">
+      <select class="branch-select" id="branch-select" onchange="loadData()">
+        <option value="">ทุกสาขา</option>
+        <option value="1">สาขาสยาม</option>
+        <option value="2">สาขาอโศก</option>
+        <option value="3">สาขาลาดพร้าว</option>
+      </select>
+      <span style="font-size:13px;color:#aaa" id="last-updated"></span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div class="kpi-grid">
+        <div class="kpi blue"><div class="kpi-label">สมาชิกทั้งหมด</div><div class="kpi-value" id="kpi-members">—</div><div class="kpi-change up" id="kpi-new">+0 สัปดาห์นี้</div></div>
+        <div class="kpi green"><div class="kpi-label">ยอดขายสะสม</div><div class="kpi-value" id="kpi-revenue">—</div><div class="kpi-sub">ตลอดชีพ</div></div>
+        <div class="kpi orange"><div class="kpi-label">Platinum</div><div class="kpi-value" id="kpi-platinum">—</div><div class="kpi-sub">สมาชิก</div></div>
+        <div class="kpi red"><div class="kpi-label">เสี่ยงหนีจาก</div><div class="kpi-value" id="kpi-atrisk">—</div><div class="kpi-sub">คน At-Risk</div></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">สมาชิกใหม่รายเดือน <span style="font-size:12px;font-weight:400;color:#aaa">6 เดือนล่าสุด</span></div>
+          <div class="chart-wrap"><canvas id="chart-members"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">RFM Segments</div>
+          <div class="chart-wrap"><canvas id="chart-rfm"></canvas></div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">ยอดขายแยกตามชั่วโมง</div>
+          <div class="chart-wrap"><canvas id="chart-hourly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">สัดส่วน Tier</div>
+          <div class="chart-wrap"><canvas id="chart-tier"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS PAGE -->
+    <div class="page" id="page-members">
+      <div class="chart-card" style="margin-bottom:16px">
+        <div class="chart-title">
+          ตาราง RFM Members
+          <div style="display:flex;gap:8px">
+            <select class="branch-select" id="seg-filter" onchange="filterTable()">
+              <option value="">ทุก Segment</option>
+              <option value="VIP">VIP</option>
+              <option value="Loyal">Loyal</option>
+              <option value="At-Risk">At-Risk</option>
+              <option value="Lost">Lost</option>
+              <option value="New">New</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+          </div>
+        </div>
+        <table id="members-table">
+          <thead><tr><th>ชื่อ</th><th>Tier</th><th>Segment</th><th>คะแนน</th><th>ใช้จ่าย(ปีนี้)</th><th>เยี่ยมล่าสุด</th><th>การกระทำ</th></tr></thead>
+          <tbody id="members-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CAMPAIGNS PAGE -->
+    <div class="page" id="page-campaigns">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h3 style="font-size:16px;font-weight:700">Campaigns ทั้งหมด</h3>
+        <button class="btn btn-primary" onclick="openNewCampaign()">+ สร้าง Campaign</button>
+      </div>
+      <div id="campaigns-list"></div>
+    </div>
+
+    <!-- QR PAGE -->
+    <div class="page" id="page-qr">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h3 style="font-size:16px;font-weight:700">UTM QR Codes</h3>
+        <button class="btn btn-primary" onclick="openNewQR()">+ สร้าง QR ใหม่</button>
+      </div>
+      <div class="qr-grid" id="qr-grid"></div>
+
+      <!-- New QR form (hidden) -->
+      <div id="qr-form" style="display:none;background:#fff;border-radius:16px;padding:24px;margin-top:16px;box-shadow:0 1px 6px rgba(0,0,0,.08)">
+        <h3 style="margin-bottom:16px;font-size:15px;font-weight:700">สร้าง QR Code ใหม่</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label style="font-size:13px;color:#666;display:block;margin-bottom:4px">ชื่อ QR</label><input type="text" id="qr-label" placeholder="เช่น โต๊ะ A1" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px"></div>
+          <div><label style="font-size:13px;color:#666;display:block;margin-bottom:4px">ตำแหน่ง</label><input type="text" id="qr-location" placeholder="เช่น table, counter, entrance" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px"></div>
+          <div><label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Campaign</label><input type="text" id="qr-campaign" placeholder="เช่น summer_2025" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px"></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" style="width:100%;padding:10px" onclick="createQR()">สร้าง QR</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAMIFICATION PAGE -->
+    <div class="page" id="page-gamification">
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi blue"><div class="kpi-label">คะแนนที่แจกไป</div><div class="kpi-value">—</div></div>
+        <div class="kpi green"><div class="kpi-label">Streaks ใช้งาน</div><div class="kpi-value">—</div></div>
+        <div class="kpi orange"><div class="kpi-label">Referrals เดือนนี้</div><div class="kpi-value">—</div></div>
+      </div>
+      <div class="chart-card" style="margin-top:16px">
+        <div class="chart-title">เหรียญรางวัลที่แจกไป</div>
+        <div class="badge-grid" id="badge-grid"></div>
+      </div>
+      <div class="chart-card" style="margin-top:16px">
+        <div class="chart-title">Leaderboard สมาชิก (Top 10)</div>
+        <table><thead><tr><th>#</th><th>ชื่อ</th><th>Tier</th><th>คะแนน</th><th>ยอดใช้จ่าย</th><th>Streak</th></tr></thead>
+        <tbody id="leaderboard-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BOOKINGS PAGE -->
+    <div class="page" id="page-bookings">
+      <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+        <input type="date" id="booking-date" style="padding:9px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px" onchange="loadBookings()">
+        <span style="font-size:13px;color:#888">เลือกวันเพื่อดูการจอง</span>
+      </div>
+      <div class="chart-card">
+        <table><thead><tr><th>เวลา</th><th>ชื่อ</th><th>จำนวน</th><th>สาขา</th><th>หมายเหตุ</th><th>สถานะ</th></tr></thead>
+        <tbody id="bookings-tbody"><tr><td colspan="6" style="text-align:center;color:#ccc;padding:20px">เลือกวันที่เพื่อดูข้อมูล</td></tr></tbody></table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const API = '';
+const token = localStorage.getItem('admin_token') || '';
+
+const BADGE_ICONS = {first_visit:'🏠',streak_3:'🔥',streak_5:'⚡',streak_10:'💎',big_spender:'💰',referral_1:'👥',birthday_used:'🎂',reviewer:'⭐'};
+
+// --- Navigation ---
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  const titles={overview:'📊 ภาพรวม',members:'👥 สมาชิก & RFM',campaigns:'📨 Campaigns',qr:'📱 UTM QR Codes',gamification:'🏆 Gamification',bookings:'📅 การจอง'};
+  document.getElementById('page-title').textContent = titles[name];
+  if(name==='overview') loadData();
+  if(name==='members') loadMembers();
+  if(name==='campaigns') loadCampaigns();
+  if(name==='qr') loadQRCodes();
+  if(name==='gamification') loadGamification();
+}
+
+async function api(path) {
+  try {
+    const res = await fetch(API+'/api/dashboard'+path, {headers:{'Authorization':'Bearer '+token}});
+    return res.ok ? res.json() : {};
+  } catch { return {}; }
+}
+
+// --- OVERVIEW ---
+let charts = {};
+async function loadData() {
+  document.getElementById('last-updated').textContent = '🔄 กำลังโหลด...';
+  const branchId = document.getElementById('branch-select').value;
+  const q = branchId ? '?branchId='+branchId : '';
+
+  const [stats, rfm] = await Promise.all([api('/stats'+q), api('/rfm'+q)]);
+
+  document.getElementById('kpi-members').textContent = (stats.total_members||0).toLocaleString();
+  document.getElementById('kpi-revenue').textContent = '฿'+(stats.total_revenue||0).toLocaleString('th-TH',{maximumFractionDigits:0});
+  document.getElementById('kpi-new').textContent = '+'+(stats.new_this_week||0)+' สัปดาห์นี้';
+
+  const tiers = stats.tier_breakdown || [];
+  const platinum = tiers.find(t=>t.tier==='platinum');
+  document.getElementById('kpi-platinum').textContent = platinum ? platinum.count : '0';
+
+  // Mock charts with demo data
+  drawMembersChart();
+  drawRFMChart(rfm.rfm || []);
+  drawHourlyChart();
+  drawTierChart(stats.tier_breakdown || []);
+
+  document.getElementById('last-updated').textContent = 'อัปเดต: '+new Date().toLocaleTimeString('th-TH');
+}
+
+function drawMembersChart() {
+  const ctx = document.getElementById('chart-members').getContext('2d');
+  if(charts.members) charts.members.destroy();
+  charts.members = new Chart(ctx, {
+    type:'bar',
+    data:{labels:['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.'],
+      datasets:[{label:'สมาชิกใหม่',data:[120,145,98,167,201,188],backgroundColor:'rgba(31,78,121,.7)',borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+}
+
+function drawRFMChart(rfm) {
+  const ctx = document.getElementById('chart-rfm').getContext('2d');
+  if(charts.rfm) charts.rfm.destroy();
+  const labels = rfm.length ? rfm.map(r=>r.rfm_segment) : ['VIP','Loyal','At-Risk','Lost','New'];
+  const data   = rfm.length ? rfm.map(r=>parseInt(r.count)) : [45,210,89,134,421];
+  charts.rfm = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:['#8E44AD','#27AE60','#E67E22','#E74C3C','#2E86C1'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+  });
+  // Update at-risk KPI
+  const atRisk = rfm.find(r=>r.rfm_segment==='At-Risk');
+  document.getElementById('kpi-atrisk').textContent = atRisk ? atRisk.count : (data[2]||'—');
+}
+
+function drawHourlyChart() {
+  const ctx = document.getElementById('chart-hourly').getContext('2d');
+  if(charts.hourly) charts.hourly.destroy();
+  const hours = Array.from({length:14},(_, i)=>(i+10)+':00');
+  charts.hourly = new Chart(ctx, {
+    type:'line',
+    data:{labels:hours,
+      datasets:[{label:'ยอดขาย',data:[3200,5100,8900,12000,9800,6500,4200,7800,11200,14500,13100,9600,7200,4800],borderColor:'#1F4E79',backgroundColor:'rgba(31,78,121,.08)',fill:true,tension:.4,pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+}
+
+function drawTierChart(tiers) {
+  const ctx = document.getElementById('chart-tier').getContext('2d');
+  if(charts.tier) charts.tier.destroy();
+  const labels = tiers.length ? tiers.map(t=>t.tier) : ['Silver','Gold','Platinum'];
+  const data   = tiers.length ? tiers.map(t=>parseInt(t.count)) : [650,210,40];
+  charts.tier = new Chart(ctx, {
+    type:'pie',
+    data:{labels,datasets:[{data,backgroundColor:['#aaa','#f6c90e','#2E86C1'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+// --- MEMBERS ---
+let allMembers = [];
+function loadMembers() {
+  // Demo data
+  allMembers = [
+    {name:'สมชาย ใจดี',tier:'platinum',segment:'VIP',points:3250,yearly_spend:12400,last_visit:'2026-06-10'},
+    {name:'มาลี รักสวย',tier:'gold',segment:'Loyal',points:1890,yearly_spend:5600,last_visit:'2026-06-08'},
+    {name:'วิชัย เก่งมาก',tier:'gold',segment:'Loyal',points:1120,yearly_spend:4200,last_visit:'2026-06-05'},
+    {name:'นภา สุขใจ',tier:'silver',segment:'New',points:200,yearly_spend:800,last_visit:'2026-06-09'},
+    {name:'ประสิทธิ์ ดีดี',tier:'silver',segment:'At-Risk',points:450,yearly_spend:1800,last_visit:'2026-05-10'},
+    {name:'รัตนา ใสใส',tier:'silver',segment:'Lost',points:100,yearly_spend:500,last_visit:'2026-03-01'},
+    {name:'กิตติ ฉลาดล้น',tier:'platinum',segment:'VIP',points:5200,yearly_spend:18000,last_visit:'2026-06-11'},
+  ];
+  renderTable(allMembers);
+}
+
+function renderTable(members) {
+  document.getElementById('members-tbody').innerHTML = members.map((m,i) => `
+    <tr>
+      <td><b>${m.name}</b></td>
+      <td><span class="tier-pill tier-${m.tier}">${{silver:'🥈 Silver',gold:'🥇 Gold',platinum:'💎 Platinum'}[m.tier]}</span></td>
+      <td><span class="segment-pill seg-${m.segment.toLowerCase().replace('-','')}">${m.segment}</span></td>
+      <td>${m.points.toLocaleString()}</td>
+      <td>฿${m.yearly_spend.toLocaleString()}</td>
+      <td>${m.last_visit}</td>
+      <td><button class="btn btn-sm" style="background:#e8f0fe;color:#1F4E79" onclick="alert('Message: ${m.name}')">📨 ส่ง</button></td>
+    </tr>`).join('');
+}
+
+function filterTable() {
+  const seg = document.getElementById('seg-filter').value;
+  renderTable(seg ? allMembers.filter(m=>m.segment===seg) : allMembers);
+}
+
+function exportCSV() {
+  const rows = [['ชื่อ','Tier','Segment','คะแนน','ยอดใช้จ่าย','เยี่ยมล่าสุด']];
+  allMembers.forEach(m=>rows.push([m.name,m.tier,m.segment,m.points,m.yearly_spend,m.last_visit]));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download='members.csv'; a.click();
+}
+
+// --- CAMPAIGNS ---
+function loadCampaigns() {
+  const demos = [
+    {name:'วันเกิดสมาชิก มิ.ย.',type:'birthday',status:'active',segment:'all',sent:89,opened:71},
+    {name:'Re-engagement สมาชิกเงียบ',type:'reengagement',status:'active',segment:'at_risk',sent:134,opened:48},
+    {name:'Platinum Exclusive',type:'manual',status:'draft',segment:'platinum',sent:0,opened:0},
+    {name:'Summer Festival',type:'broadcast',status:'done',segment:'all',sent:892,opened:634},
+  ];
+  document.getElementById('campaigns-list').innerHTML = demos.map(c => `
+    <div class="campaign-card">
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">
+          <span class="status-dot dot-${c.status}"></span>${c.name}
+        </div>
+        <div style="font-size:12px;color:#888">เป้าหมาย: ${c.segment} • ส่งแล้ว: ${c.sent.toLocaleString()} • เปิดอ่าน: ${c.sent?Math.round(c.opened/c.sent*100)+'%':'—'}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span style="background:${c.status==='active'?'#d1fae5':c.status==='draft'?'#f3f4f6':'#e8f0fe'};color:${c.status==='active'?'#065f46':c.status==='draft'?'#666':'#1F4E79'};padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">
+          ${c.status==='active'?'🟢 Active':c.status==='draft'?'⚪ Draft':'✅ Done'}
+        </span>
+        <button class="btn btn-sm btn-primary">แก้ไข</button>
+      </div>
+    </div>`).join('');
+}
+
+function openNewCampaign() { alert('Campaign editor — เชื่อมกับ /api/dashboard/campaigns'); }
+
+// --- QR ---
+let qrData = [];
+function loadQRCodes() {
+  qrData = [
+    {id:'abc1',label:'โต๊ะ A1',location:'table',scan_count:45,qrUrl:'https://via.placeholder.com/120/1F4E79/fff?text=QR'},
+    {id:'abc2',label:'Counter',location:'counter',scan_count:128,qrUrl:'https://via.placeholder.com/120/27AE60/fff?text=QR'},
+    {id:'abc3',label:'ทางเข้า',location:'entrance',scan_count:312,qrUrl:'https://via.placeholder.com/120/E67E22/fff?text=QR'},
+  ];
+  document.getElementById('qr-grid').innerHTML = qrData.map(q=>`
+    <div class="qr-card">
+      <img class="qr-img" src="${q.qrUrl}" alt="QR">
+      <div class="qr-label">${q.label}</div>
+      <div class="qr-scans">${q.scan_count}</div>
+      <div class="qr-sub">สแกนทั้งหมด</div>
+      <button class="btn btn-sm" style="background:#e8f0fe;color:#1F4E79;margin-top:8px" onclick="downloadQR('${q.id}')">📥 ดาวน์โหลด</button>
+    </div>`).join('');
+}
+
+function openNewQR() {
+  const f = document.getElementById('qr-form');
+  f.style.display = f.style.display==='none' ? 'block' : 'none';
+}
+
+async function createQR() {
+  const label    = document.getElementById('qr-label').value;
+  const location = document.getElementById('qr-location').value;
+  const campaign = document.getElementById('qr-campaign').value;
+  if(!label) { alert('กรุณากรอกชื่อ QR'); return; }
+  try {
+    const res = await fetch(API+'/api/dashboard/qr', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({ branchId: document.getElementById('branch-select').value||'1', label, location, utmCampaign:campaign })
+    });
+    const qr = await res.json();
+    alert('สร้าง QR สำเร็จ! URL: '+qr.url);
+    document.getElementById('qr-form').style.display='none';
+    loadQRCodes();
+  } catch { alert('เกิดข้อผิดพลาด — ตรวจสอบ Backend'); }
+}
+
+function downloadQR(id) { alert('Download QR id: '+id+'\n(จะสร้างเป็น PNG/PDF จาก backend)'); }
+
+// --- GAMIFICATION ---
+function loadGamification() {
+  const badges = [{name:'first_visit',count:892},{name:'streak_3',count:341},{name:'streak_5',count:189},{name:'streak_10',count:67},{name:'big_spender',count:45},{name:'referral_1',count:123},{name:'birthday_used',count:234},{name:'reviewer',count:78}];
+  document.getElementById('badge-grid').innerHTML = badges.map(b=>`
+    <div class="badge-card">
+      <div class="badge-icon">${BADGE_ICONS[b.name]||'🏅'}</div>
+      <div class="badge-count">${b.count}</div>
+      <div class="badge-name">${b.name.replace(/_/g,' ')}</div>
+    </div>`).join('');
+
+  document.getElementById('leaderboard-tbody').innerHTML = [
+    {name:'กิตติ ฉลาดล้น',tier:'platinum',points:5200,spend:18000,streak:12},
+    {name:'สมชาย ใจดี',tier:'platinum',points:3250,spend:12400,streak:8},
+    {name:'วีระ เก่งมาก',tier:'gold',points:2100,spend:7800,streak:5},
+    {name:'มาลี รักสวย',tier:'gold',points:1890,spend:5600,streak:3},
+    {name:'นพดล ดีงาม',tier:'gold',points:1540,spend:4900,streak:4},
+  ].map((m,i)=>`
+    <tr>
+      <td><b>${i+1}</b></td><td>${m.name}</td>
+      <td><span class="tier-pill tier-${m.tier}">${m.tier}</span></td>
+      <td>${m.points.toLocaleString()}</td>
+      <td>฿${m.spend.toLocaleString()}</td>
+      <td>${m.streak} 🔥</td>
+    </tr>`).join('');
+}
+
+// --- BOOKINGS ---
+function loadBookings() {
+  const date = document.getElementById('booking-date').value;
+  // Demo data
+  const demos = [
+    {time:'11:30',name:'สมชาย ใจดี',party:4,branch:'สยาม',notes:'โต๊ะริมหน้าต่าง',status:'confirmed'},
+    {time:'12:00',name:'มาลี รักสวย',party:2,branch:'สยาม',notes:'',status:'confirmed'},
+    {time:'18:30',name:'วิชัย เก่งมาก',party:6,branch:'สยาม',notes:'วันเกิด',status:'pending'},
+    {time:'19:00',name:'นภา สุขใจ',party:3,branch:'สยาม',notes:'',status:'confirmed'},
+  ];
+  const statusTH = {confirmed:'✅ ยืนยัน',pending:'⏳ รอ',cancelled:'❌ ยกเลิก'};
+  document.getElementById('bookings-tbody').innerHTML = demos.map(b=>`
+    <tr>
+      <td><b>${b.time}</b></td><td>${b.name}</td><td>${b.party} คน</td>
+      <td>${b.branch}</td><td>${b.notes||'—'}</td>
+      <td>${statusTH[b.status]||b.status}</td>
+    </tr>`).join('');
+}
+
+// --- Init ---
+document.getElementById('booking-date').value = new Date().toISOString().slice(0,10);
+loadData();
+</script>
+</body>
+</html>
