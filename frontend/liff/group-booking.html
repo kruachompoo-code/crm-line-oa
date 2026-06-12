@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองหมู่คณะ</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f0f4f8;padding-bottom:40px}
+  .header{background:linear-gradient(135deg,#6B2FAB,#9B59B6);padding:20px 16px 28px;color:#fff}
+  .header h1{font-size:20px;font-weight:800;margin-bottom:4px}
+  .header p{font-size:13px;opacity:.85}
+  .step-bar{display:flex;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:99}
+  .step{flex:1;padding:13px 4px;text-align:center;font-size:11px;color:#aaa;border-bottom:2px solid transparent;cursor:pointer}
+  .step.active{color:#6B2FAB;border-bottom-color:#6B2FAB;font-weight:700}
+  .step.done{color:#27AE60}
+  .page{padding:16px;display:none}.page.active{display:block}
+  .card{background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+  label{display:block;font-size:13px;color:#666;margin-bottom:5px;margin-top:13px;font-weight:600}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;background:#fff}
+  textarea{resize:none}
+  .party-input{display:flex;align-items:center;gap:12px;margin-top:6px}
+  .party-big-btn{width:40px;height:40px;border-radius:50%;border:2px solid #6B2FAB;background:#fff;color:#6B2FAB;font-size:20px;cursor:pointer;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .party-big-num{font-size:28px;font-weight:800;color:#6B2FAB;min-width:40px;text-align:center}
+  .party-note{font-size:12px;color:#aaa;margin-top:4px}
+  .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+  .time-btn{padding:9px 4px;border:1.5px solid #e0e0e0;border-radius:10px;text-align:center;font-size:12px;cursor:pointer}
+  .time-btn.sel{background:#6B2FAB;color:#fff;border-color:#6B2FAB}
+
+  /* Packages */
+  .pkg-card{border:2px solid #e0e0e0;border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:.2s;position:relative}
+  .pkg-card.sel{border-color:#6B2FAB;background:#faf5ff}
+  .pkg-card.sel::after{content:'✓';position:absolute;top:12px;right:16px;background:#6B2FAB;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+  .pkg-name{font-size:16px;font-weight:800;color:#6B2FAB;margin-bottom:4px}
+  .pkg-desc{font-size:13px;color:#666;margin-bottom:8px}
+  .pkg-price{font-size:20px;font-weight:800;color:#222}
+  .pkg-price span{font-size:13px;font-weight:400;color:#999}
+  .pkg-min{font-size:12px;color:#27AE60;font-weight:600;margin-top:4px}
+  .pkg-none{border:2px dashed #ddd;border-radius:16px;padding:16px;cursor:pointer;text-align:center;color:#aaa;font-size:14px;margin-bottom:12px}
+  .pkg-none.sel{border-color:#6B2FAB;color:#6B2FAB;background:#faf5ff}
+
+  /* Cost summary */
+  .cost-box{background:#faf5ff;border:1.5px solid #9B59B6;border-radius:14px;padding:16px;margin-bottom:12px}
+  .cost-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+  .cost-row.total{font-size:18px;font-weight:800;color:#6B2FAB;border-top:2px solid #9B59B6;padding-top:10px;margin-top:4px}
+  .highlight{background:#f3e5ff;border-radius:12px;padding:12px;font-size:13px;color:#6B2FAB;margin-bottom:12px;line-height:1.6}
+
+  /* Payment */
+  .pay-opt{border:1.5px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+  .pay-opt.sel{border-color:#6B2FAB;background:#faf5ff}
+  .pay-icon{font-size:26px}
+
+  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px}
+  .btn-primary{background:#6B2FAB;color:#fff}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-outline{background:#fff;color:#6B2FAB;border:1.5px solid #6B2FAB}
+  .success-screen{text-align:center;padding:40px 20px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🎉 จองหมู่คณะ</h1>
+  <p>สำหรับ 6 ท่านขึ้นไป • แพ็กเกจพิเศษ • ชำระมัดจำ 50%</p>
+</div>
+
+<div class="step-bar">
+  <div class="step active" id="gs1">1. วันเวลา</div>
+  <div class="step" id="gs2">2. แพ็กเกจ</div>
+  <div class="step" id="gs3">3. ข้อมูลติดต่อ</div>
+  <div class="step" id="gs4">4. ชำระมัดจำ</div>
+</div>
+
+<!-- STEP 1: Date/Time/Party -->
+<div class="page active" id="gpage1">
+  <div class="card">
+    <label>สาขา</label>
+    <select id="g-branch">
+      <option value="1">สาขาสยาม</option>
+      <option value="2">สาขาอโศก</option>
+      <option value="3">สาขาลาดพร้าว</option>
+    </select>
+    <label>จำนวนผู้เข้าร่วม (ขั้นต่ำ 6 ท่าน)</label>
+    <div class="party-input">
+      <button class="party-big-btn" onclick="changeParty(-1)">−</button>
+      <div class="party-big-num" id="g-party-num">10</div>
+      <button class="party-big-btn" onclick="changeParty(1)">+</button>
+    </div>
+    <div class="party-note" id="g-party-note">👥 10 ท่าน</div>
+    <label>วันที่จัดงาน</label>
+    <input type="date" id="g-date" min="">
+    <label>เวลาเริ่ม</label>
+    <div class="time-grid" id="g-time-grid"></div>
+    <label>โอกาสพิเศษ (ถ้ามี)</label>
+    <input type="text" id="g-occasion" placeholder="เช่น ฉลองวันเกิด, งานเลี้ยงบริษัท, ครบรอบแต่งงาน">
+  </div>
+  <button class="btn btn-primary" onclick="gGoStep2()">เลือกแพ็กเกจ →</button>
+</div>
+
+<!-- STEP 2: Package selection -->
+<div class="page" id="gpage2">
+  <div class="card">
+    <div style="font-size:13px;color:#666;margin-bottom:14px">
+      เลือกแพ็กเกจสำหรับ <b id="pkg-party-label">10 ท่าน</b>
+    </div>
+
+    <div class="pkg-none sel" id="pkg-none" onclick="selectPkg(0)">
+      🍽️ สั่งอาหาร A La Carte (เลือกเองตามใจ)
+    </div>
+
+    <div class="pkg-card" id="pkg-1" onclick="selectPkg(1)">
+      <div class="pkg-name">แพ็กเกจ A — มื้อสังสรรค์</div>
+      <div class="pkg-desc">4 จาน + เครื่องดื่ม ต่อท่าน</div>
+      <div class="pkg-price">฿299 <span>/ ท่าน</span></div>
+      <div class="pkg-min">✓ ขั้นต่ำ 6 ท่าน</div>
+      <div id="pkg-1-total" style="font-size:12px;color:#9B59B6;margin-top:4px"></div>
+    </div>
+
+    <div class="pkg-card" id="pkg-2" onclick="selectPkg(2)">
+      <div class="pkg-name">แพ็กเกจ B — งานครอบครัว</div>
+      <div class="pkg-desc">6 จาน + ของหวาน + เครื่องดื่ม</div>
+      <div class="pkg-price">฿399 <span>/ ท่าน</span></div>
+      <div class="pkg-min">✓ ขั้นต่ำ 8 ท่าน</div>
+      <div id="pkg-2-total" style="font-size:12px;color:#9B59B6;margin-top:4px"></div>
+    </div>
+
+    <div class="pkg-card" id="pkg-3" onclick="selectPkg(3)">
+      <div class="pkg-name">แพ็กเกจ C — อีเวนต์พรีเมียม</div>
+      <div class="pkg-desc">8 จาน + ซีฟู้ด + เครื่องดื่มไม่จำกัด</div>
+      <div class="pkg-price">฿599 <span>/ ท่าน</span></div>
+      <div class="pkg-min">✓ ขั้นต่ำ 12 ท่าน</div>
+      <div id="pkg-3-total" style="font-size:12px;color:#9B59B6;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <div class="cost-box" id="cost-box">
+    <div class="cost-row"><span>แพ็กเกจ</span><span id="cb-pkg">—</span></div>
+    <div class="cost-row"><span>จำนวน</span><span id="cb-party">—</span></div>
+    <div class="cost-row"><span>ยอดรวม</span><span id="cb-total">—</span></div>
+    <div class="cost-row total"><span>มัดจำ 50%</span><span id="cb-deposit">—</span></div>
+    <div class="cost-row" style="color:#27AE60"><span>ค้างชำระที่ร้าน</span><span id="cb-remaining">—</span></div>
+  </div>
+
+  <button class="btn btn-primary" id="g-to-contact" onclick="gGoStep3()" disabled>กรอกข้อมูลติดต่อ →</button>
+  <button class="btn btn-outline" onclick="gGoStep(1)">← กลับ</button>
+</div>
+
+<!-- STEP 3: Contact info -->
+<div class="page" id="gpage3">
+  <div class="card">
+    <div style="font-size:13px;color:#666;margin-bottom:12px">
+      📞 กรุณากรอกข้อมูลผู้ประสานงาน เพื่อให้ทีมงานติดต่อยืนยัน
+    </div>
+    <label>ชื่อผู้ประสานงาน *</label>
+    <input type="text" id="g-contact-name" placeholder="ชื่อ-นามสกุล">
+    <label>เบอร์โทรศัพท์ *</label>
+    <input type="tel" id="g-contact-phone" placeholder="08x-xxx-xxxx" maxlength="10">
+    <label>หมายเหตุพิเศษ</label>
+    <textarea id="g-notes" rows="3" placeholder="เช่น ต้องการห้องส่วนตัว, แพ้อาหารบางชนิด, ต้องการตกแต่งพิเศษ"></textarea>
+  </div>
+  <div class="highlight" id="g-summary-box">
+    📋 สรุปการจอง: กำลังคำนวณ...
+  </div>
+  <button class="btn btn-primary" onclick="gGoStep4()">ดำเนินการชำระมัดจำ →</button>
+  <button class="btn btn-outline" onclick="gGoStep(2)">← กลับ</button>
+</div>
+
+<!-- STEP 4: Payment -->
+<div class="page" id="gpage4">
+  <div class="card">
+    <div class="highlight" style="background:#f3e5ff;border-radius:12px;padding:16px;margin-bottom:16px">
+      💜 ชำระมัดจำ <b id="g-pay-amt">฿0</b><br>
+      ส่วนที่เหลือ <b id="g-pay-rem">฿0</b> ชำระที่ร้านในวันงาน
+    </div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px">เลือกวิธีชำระ</div>
+    <div class="pay-opt sel" id="gpay-linepay" onclick="gSelectPay('linepay')">
+      <div class="pay-icon">💚</div><div><div style="font-weight:700;font-size:14px">LINE Pay</div><div style="font-size:12px;color:#999">ชำระด้วย LINE Pay</div></div>
+    </div>
+    <div class="pay-opt" id="gpay-transfer" onclick="gSelectPay('transfer')">
+      <div class="pay-icon">🏦</div><div><div style="font-weight:700;font-size:14px">โอนธนาคาร</div><div style="font-size:12px;color:#999">กสิกร / SCB / กรุงไทย</div></div>
+    </div>
+    <div id="transfer-info" style="display:none;background:#f8f9fa;border-radius:12px;padding:14px;font-size:13px;color:#555;margin-top:10px;line-height:2">
+      🏦 ธนาคารกสิกรไทย<br>
+      เลขบัญชี: <b>123-4-56789-0</b><br>
+      ชื่อบัญชี: บริษัท ร้านอาหาร จำกัด<br>
+      <input type="text" id="g-slip-ref" placeholder="อ้างอิงการโอน / เลขที่ธุรกรรม" style="margin-top:8px;padding:10px;border:1.5px solid #ddd;border-radius:8px;width:100%">
+    </div>
+  </div>
+  <button class="btn btn-primary" id="g-pay-btn" onclick="gProcessPayment()">✅ ยืนยันการชำระมัดจำ</button>
+  <button class="btn btn-outline" onclick="gGoStep(3)">← กลับ</button>
+</div>
+
+<!-- SUCCESS -->
+<div class="page" id="gpage-success">
+  <div class="success-screen">
+    <div style="font-size:72px;margin-bottom:16px">🎊</div>
+    <h2 style="font-size:22px;font-weight:800;color:#6B2FAB;margin-bottom:8px">จองหมู่คณะสำเร็จ!</h2>
+    <p style="color:#666;line-height:1.8;margin-bottom:20px">ทีมงานจะติดต่อยืนยันรายละเอียด<br>ภายใน 1 วันทำการ</p>
+    <div class="cost-box" style="text-align:left">
+      <div class="cost-row"><span>📅 วันที่</span><span id="gs-date">—</span></div>
+      <div class="cost-row"><span>⏰ เวลา</span><span id="gs-time">—</span></div>
+      <div class="cost-row"><span>👥 จำนวน</span><span id="gs-party">—</span></div>
+      <div class="cost-row"><span>📦 แพ็กเกจ</span><span id="gs-pkg">—</span></div>
+      <div class="cost-row"><span>💜 มัดจำ</span><span id="gs-deposit">—</span></div>
+      <div class="cost-row" style="color:#27AE60"><span>💳 ค้างชำระ</span><span id="gs-remaining">—</span></div>
+    </div>
+    <div style="background:#f0fdf4;border-radius:12px;padding:12px;font-size:13px;color:#166534;margin-top:8px">
+      📞 หากมีการเปลี่ยนแปลง กรุณาแจ้งล่วงหน้า 48 ชั่วโมง เพื่อรับเงินมัดจำคืน
+    </div>
+    <button class="btn btn-outline" onclick="liff.closeWindow()" style="margin-top:12px">ปิด</button>
+  </div>
+</div>
+
+<script>
+const TIMES = ['11:00','11:30','12:00','12:30','13:00','13:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'];
+const PKGS = {
+  0:{ id:0, name:'A La Carte', pricePerHead:0 },
+  1:{ id:1, name:'แพ็กเกจ A — มื้อสังสรรค์', pricePerHead:299, minPersons:6 },
+  2:{ id:2, name:'แพ็กเกจ B — งานครอบครัว', pricePerHead:399, minPersons:8 },
+  3:{ id:3, name:'แพ็กเกจ C — อีเวนต์พรีเมียม', pricePerHead:599, minPersons:12 },
+};
+
+let gParty=10, gPkgId=0, gPayMethod='linepay', gDepositAmt=0, gRemainingAmt=0;
+let authToken = '';
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_GROUP@@' });
+  if (!liff.isLoggedIn()) liff.login();
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('g-date').min = new Date(Date.now()+86400000*3).toISOString().slice(0,10);
+  document.getElementById('g-date').value = new Date(Date.now()+86400000*7).toISOString().slice(0,10);
+  document.getElementById('g-time-grid').innerHTML = TIMES.map((t,i)=>
+    `<div class="time-btn${i===6?' sel':''}" onclick="gSelectTime(this,'${t}')">${t}</div>`).join('');
+  updatePkgTotals();
+
+  const { token } = await (await fetch('/api/auth/line',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({idToken:liff.getIDToken()})
+  })).json();
+  authToken = token;
+}
+
+function changeParty(d) {
+  gParty = Math.max(6, Math.min(100, gParty+d));
+  document.getElementById('g-party-num').textContent = gParty;
+  document.getElementById('g-party-note').textContent = '👥 '+gParty+' ท่าน';
+  updatePkgTotals();
+}
+
+function gSelectTime(el) {
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function updatePkgTotals() {
+  document.getElementById('pkg-party-label').textContent = gParty+' ท่าน';
+  [1,2,3].forEach(i=>{
+    const p = PKGS[i];
+    const total = p.pricePerHead * gParty;
+    document.getElementById('pkg-'+i+'-total').textContent = `รวม ${gParty} ท่าน = ฿${total.toLocaleString()}`;
+  });
+  updateCostBox();
+}
+
+function selectPkg(id) {
+  gPkgId = id;
+  ['none',1,2,3].forEach(k=>document.getElementById('pkg-'+(k==='none'?'none':k)).classList.remove('sel'));
+  document.getElementById('pkg-'+(id===0?'none':id)).classList.add('sel');
+  document.getElementById('g-to-contact').disabled = false;
+  updateCostBox();
+}
+
+function updateCostBox() {
+  const pkg = PKGS[gPkgId];
+  const total = pkg.pricePerHead * gParty;
+  gDepositAmt   = Math.ceil(total*0.5);
+  gRemainingAmt = total - gDepositAmt;
+  document.getElementById('cb-pkg').textContent       = pkg.name;
+  document.getElementById('cb-party').textContent     = gParty+' ท่าน';
+  document.getElementById('cb-total').textContent     = total>0?'฿'+total.toLocaleString():'—';
+  document.getElementById('cb-deposit').textContent   = total>0?'฿'+gDepositAmt.toLocaleString():'—';
+  document.getElementById('cb-remaining').textContent = total>0?'฿'+gRemainingAmt.toLocaleString():'—';
+  if (gPkgId===0) document.getElementById('g-to-contact').disabled = false;
+}
+
+function gGoStep2() {
+  if (!document.getElementById('g-date').value || !document.querySelector('.time-btn.sel'))
+    return alert('กรุณาเลือกวันที่และเวลา');
+  selectPkg(0);
+  gGoStep(2);
+}
+
+function gGoStep3() {
+  document.getElementById('g-pay-amt').textContent = '฿'+gDepositAmt.toLocaleString();
+  document.getElementById('g-pay-rem').textContent = '฿'+gRemainingAmt.toLocaleString();
+  const pkg = PKGS[gPkgId];
+  const total = pkg.pricePerHead * gParty;
+  document.getElementById('g-summary-box').innerHTML = `
+    📋 <b>${document.getElementById('g-date').value}</b> เวลา <b>${document.querySelector('.time-btn.sel')?.textContent}</b><br>
+    👥 ${gParty} ท่าน • ${pkg.name}<br>
+    💜 มัดจำ <b>฿${gDepositAmt.toLocaleString()}</b> | ค้างชำระ ฿${gRemainingAmt.toLocaleString()}
+  `;
+  gGoStep(3);
+}
+
+function gGoStep4() {
+  if (!document.getElementById('g-contact-name').value || !document.getElementById('g-contact-phone').value)
+    return alert('กรุณากรอกชื่อและเบอร์โทรผู้ประสานงาน');
+  gGoStep(4);
+}
+
+function gGoStep(n) {
+  for(let i=1;i<=4;i++) {
+    const p = document.getElementById('gpage'+i);
+    if(p) p.classList.toggle('active', i===n);
+  }
+  document.getElementById('gpage-success')?.classList.remove('active');
+  ['gs1','gs2','gs3','gs4'].forEach((s,i)=>{
+    const el=document.getElementById(s);
+    if(el) el.className='step'+(i+1<n?' done':i+1===n?' active':'');
+  });
+  window.scrollTo(0,0);
+}
+
+function gSelectPay(method) {
+  gPayMethod = method;
+  ['linepay','transfer'].forEach(m=>document.getElementById('gpay-'+m).classList.toggle('sel',m===method));
+  document.getElementById('transfer-info').style.display = method==='transfer'?'block':'none';
+}
+
+async function gProcessPayment() {
+  const btn = document.getElementById('g-pay-btn');
+  btn.disabled=true; btn.textContent='กำลังดำเนินการ...';
+
+  try {
+    const res = await fetch('/api/bookings/group', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({
+        branchId:    document.getElementById('g-branch').value,
+        partySize:   gParty,
+        bookingDate: document.getElementById('g-date').value,
+        bookingTime: document.querySelector('.time-btn.sel')?.textContent,
+        packageId:   gPkgId||null,
+        contactName: document.getElementById('g-contact-name').value,
+        contactPhone:document.getElementById('g-contact-phone').value,
+        occasion:    document.getElementById('g-occasion').value,
+        notes:       document.getElementById('g-notes').value
+      })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error);
+
+    const txRef = 'GRP'+Date.now();
+    await fetch(`/api/bookings/reservation/${data.booking.id}/deposit`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({txRef})
+    });
+
+    document.getElementById('gs-date').textContent    = data.booking.booking_date;
+    document.getElementById('gs-time').textContent    = data.booking.booking_time;
+    document.getElementById('gs-party').textContent   = gParty+' ท่าน';
+    document.getElementById('gs-pkg').textContent     = PKGS[gPkgId].name;
+    document.getElementById('gs-deposit').textContent = '฿'+gDepositAmt.toLocaleString();
+    document.getElementById('gs-remaining').textContent='฿'+gRemainingAmt.toLocaleString();
+
+    for(let i=1;i<=4;i++) document.getElementById('gpage'+i)?.classList.remove('active');
+    document.getElementById('gpage-success').classList.add('active');
+    window.scrollTo(0,0);
+  } catch(e) {
+    btn.disabled=false; btn.textContent='✅ ยืนยันการชำระมัดจำ';
+    alert('เกิดข้อผิดพลาด: '+e.message);
+  }
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
