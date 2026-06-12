@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ศูนย์ความเป็นส่วนตัว</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f8f9fa;padding:20px}
+  h1{font-size:20px;font-weight:700;color:#4dc8f4;margin-bottom:4px}
+  .sub{font-size:13px;color:#888;margin-bottom:24px}
+  .section{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+  .section h2{font-size:15px;font-weight:700;color:#333;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .section p{font-size:13px;color:#666;line-height:1.7;margin-bottom:12px}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #f0f0f0}
+  .toggle-label{font-size:14px;color:#333}
+  .toggle{position:relative;width:48px;height:26px}
+  .toggle input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:26px;transition:.3s}
+  .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+  input:checked+.slider{background:#4dc8f4}
+  input:checked+.slider:before{transform:translateX(22px)}
+  .danger-zone{border:1.5px solid #fed7d7;background:#fff5f5}
+  .danger-zone h2{color:#c53030}
+  .btn{width:100%;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+  .btn-outline{background:#fff;color:#4dc8f4;border:1.5px solid #4dc8f4}
+  .btn-danger{background:#e53e3e;color:#fff}
+  .save-btn{background:#4dc8f4;color:#fff;padding:14px;font-size:15px}
+</style>
+</head>
+<body>
+<h1>🔐 ศูนย์ความเป็นส่วนตัว</h1>
+<p class="sub">จัดการข้อมูลส่วนตัวของคุณตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)</p>
+
+<div class="section">
+  <h2>📋 ความยินยอมการใช้ข้อมูล</h2>
+  <p>เราเก็บข้อมูลเพื่อให้บริการที่ดีขึ้น คุณสามารถกำหนดได้ว่าจะให้เราใช้ข้อมูลอะไรบ้าง</p>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">📨 รับข่าวสาร & โปรโมชั่น</div>
+      <div style="font-size:12px;color:#aaa">Push notification และ SMS</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="c-marketing" checked><span class="slider"></span></label>
+  </div>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">📊 วิเคราะห์พฤติกรรม</div>
+      <div style="font-size:12px;color:#aaa">เพื่อปรับปรุงประสบการณ์</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="c-analytics" checked><span class="slider"></span></label>
+  </div>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">🤝 แชร์กับพาร์ทเนอร์</div>
+      <div style="font-size:12px;color:#aaa">สิทธิพิเศษจากร้านพาร์ทเนอร์</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="c-partners"><span class="slider"></span></label>
+  </div>
+</div>
+
+<div class="section">
+  <h2>📅 การแจ้งเตือน</h2>
+  <div class="toggle-row">
+    <div><div class="toggle-label">🎂 แจ้งเตือนวันเกิด</div></div>
+    <label class="toggle"><input type="checkbox" id="n-birthday" checked><span class="slider"></span></label>
+  </div>
+  <div class="toggle-row">
+    <div><div class="toggle-label">⭐ คะแนนและคูปอง</div></div>
+    <label class="toggle"><input type="checkbox" id="n-loyalty" checked><span class="slider"></span></label>
+  </div>
+  <div class="toggle-row">
+    <div><div class="toggle-label">📅 ยืนยันการจอง</div></div>
+    <label class="toggle"><input type="checkbox" id="n-booking" checked><span class="slider"></span></label>
+  </div>
+</div>
+
+<button class="btn save-btn" onclick="saveConsents()">💾 บันทึกการตั้งค่า</button>
+
+<div class="section danger-zone" style="margin-top:16px">
+  <h2>⚠️ โซนอันตราย</h2>
+  <p>การดำเนินการด้านล่างไม่สามารถยกเลิกได้</p>
+  <button class="btn btn-outline" onclick="exportData()">📥 ขอรับข้อมูลของฉัน</button>
+  <button class="btn btn-danger" onclick="deleteAccount()">🗑️ ลบบัญชีและข้อมูลทั้งหมด</button>
+</div>
+
+<script>
+let authToken = '';
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_PDPA@@' });
+  if (!liff.isLoggedIn()) liff.login();
+
+  const { token } = await (await fetch('/api/auth/line', {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ idToken: liff.getIDToken() })
+  })).json();
+  authToken = token;
+
+  const { consents } = await (await fetch('/api/members/consents', {
+    headers:{'Authorization':'Bearer '+token}
+  })).json();
+
+  consents.forEach(c => {
+    const el = document.getElementById('c-'+c.type) || document.getElementById('n-'+c.type);
+    if (el) el.checked = c.consented;
+  });
+}
+
+async function saveConsents() {
+  const types = ['marketing','analytics','partners','birthday','loyalty','booking'];
+  for (const t of types) {
+    const el = document.getElementById('c-'+t)||document.getElementById('n-'+t);
+    if (!el) continue;
+    await fetch('/api/members/consents', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ type:t, consented:el.checked })
+    });
+  }
+  alert('บันทึกสำเร็จ ✅');
+}
+
+async function exportData() {
+  const res = await fetch('/api/members/export', { headers:{'Authorization':'Bearer '+authToken} });
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='my-data.json'; a.click();
+}
+
+async function deleteAccount() {
+  if (!confirm('ยืนยันการลบบัญชี? ข้อมูลทั้งหมดจะถูกลบ')) return;
+  await fetch('/api/members/me', { method:'DELETE', headers:{'Authorization':'Bearer '+authToken} });
+  alert('ลบบัญชีสำเร็จ');
+  liff.closeWindow();
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
