@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โปรไฟล์สมาชิก</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans Thai',sans-serif;background:#f0f9ff;padding-bottom:32px}
+  .header{background:linear-gradient(135deg,#4dc8f4,#2E86C1);color:#fff;padding:24px 20px 48px;position:relative}
+  .avatar{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.5);display:block;margin:0 auto 12px}
+  .uname{text-align:center;font-size:18px;font-weight:700}
+  .tier-badge{text-align:center;font-size:13px;opacity:.85;margin-top:4px}
+  .card{background:#fff;border-radius:20px;margin:−20px 16px 0;position:relative;top:-20px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+  .pts{text-align:center;margin-bottom:16px}
+  .pts-num{font-size:42px;font-weight:800;color:#4dc8f4}
+  .pts-label{font-size:13px;color:#888;margin-top:2px}
+  .progress-wrap{margin:12px 0}
+  .progress-label{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:6px}
+  .progress{height:8px;background:#e8f0fe;border-radius:4px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#4dc8f4,#2E86C1);border-radius:4px;transition:width .6s}
+  .section{margin:16px}
+  h3{font-size:15px;font-weight:700;color:#333;margin-bottom:12px}
+  .coupon{background:#fff9e6;border:1.5px dashed #f6c90e;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+  .coupon-icon{font-size:28px}
+  .coupon-name{font-weight:600;font-size:14px;color:#333}
+  .coupon-exp{font-size:12px;color:#999;margin-top:2px}
+  .coupon-btn{margin-left:auto;background:#4dc8f4;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer}
+  .tab-bar{display:flex;border-bottom:2px solid #eee;margin:0 16px 16px}
+  .tab{flex:1;text-align:center;padding:10px;font-size:14px;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+  .tab.active{color:#4dc8f4;border-bottom-color:#4dc8f4;font-weight:700}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+  .history-pts{font-weight:700;color:#4dc8f4}
+  .edit-btn{display:block;width:calc(100%-32px);margin:0 16px;padding:14px;background:#f0f6ff;color:#4dc8f4;border:1.5px solid #4dc8f4;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center}
+  .tier-pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px}
+  .tier-silver{background:#e8e8e8;color:#666}
+  .tier-gold{background:#fff3cd;color:#856404}
+  .tier-platinum{background:#e8f4fd;color:#4dc8f4}
+</style>
+</head>
+<body>
+<div class="header">
+  <img id="avatar" class="avatar" src="https://via.placeholder.com/72">
+  <div class="uname" id="uname">กำลังโหลด...</div>
+  <div class="tier-badge" id="tier-badge"></div>
+</div>
+
+<div class="card">
+  <div class="pts">
+    <div class="pts-num" id="points">0</div>
+    <div class="pts-label">คะแนนสะสม</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>ยอดใช้จ่ายปีนี้: <b id="yearly-spend">฿0</b></span>
+      <span id="tier-next">Gold ต้องการอีก ฿3,000</span>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('coupons',this)">คูปอง</div>
+  <div class="tab" onclick="showTab('history',this)">ประวัติ</div>
+  <div class="tab" onclick="showTab('badges',this)">รางวัล</div>
+</div>
+
+<div id="tab-coupons" class="section">
+  <h3>คูปองของฉัน</h3>
+  <div id="coupons-list"><div style="text-align:center;color:#ccc;padding:20px">ไม่มีคูปอง</div></div>
+</div>
+
+<div id="tab-history" class="section" style="display:none">
+  <h3>ประวัติคะแนน</h3>
+  <div id="history-list"></div>
+</div>
+
+<div id="tab-badges" class="section" style="display:none">
+  <h3>เหรียญรางวัล</h3>
+  <div id="badges-list" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+</div>
+
+<button class="edit-btn" onclick="editProfile()">✏️ แก้ไขข้อมูล</button>
+
+<script>
+const BADGES_META = {
+  first_visit:'🏠 เยี่ยมแรก',streak_3:'🔥 3 วันติด',streak_5:'⚡ 5 วันติด',
+  streak_10:'💎 10 วันติด',big_spender:'💰 ใช้จ่ายสูง',referral_1:'👥 แนะนำเพื่อน',
+  birthday_used:'🎂 วันเกิด',reviewer:'⭐ นักรีวิว'
+};
+const TIER_THRESHOLDS = { silver:0, gold:3000, platinum:10000 };
+let authToken = '';
+
+async function init() {
+  await liff.init({ liffId: '@@LIFF_ID_PROFILE@@' });
+  if (!liff.isLoggedIn()) liff.login();
+  const idToken = liff.getIDToken();
+
+  const authRes = await fetch('/api/auth/line', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ idToken })
+  });
+  const { token } = await authRes.json();
+  authToken = token;
+
+  const res = await fetch('/api/members/profile', { headers:{'Authorization':'Bearer '+token} });
+  const { member, coupons } = await res.json();
+
+  document.getElementById('avatar').src = member.picture_url || 'https://via.placeholder.com/72';
+  document.getElementById('uname').textContent = member.name || member.display_name;
+
+  const tierLabel = {silver:'Silver 🥈',gold:'Gold 🥇',platinum:'Platinum 💎'}[member.tier] || 'Silver';
+  document.getElementById('tier-badge').textContent = tierLabel + ' Member';
+  document.getElementById('points').textContent = member.points_balance.toLocaleString();
+
+  const spend = parseFloat(member.yearly_spend||0);
+  document.getElementById('yearly-spend').textContent = '฿'+spend.toLocaleString();
+  let nextTier=3000, nextName='Gold';
+  if (member.tier==='gold') { nextTier=10000; nextName='Platinum'; }
+  if (member.tier==='platinum') { nextTier=spend; nextName='MAX'; }
+  const pct = Math.min(100, (spend/nextTier)*100);
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('tier-next').textContent = member.tier==='platinum'
+    ? '🏆 Platinum สูงสุด!'
+    : nextName+` ต้องการอีก ฿${(nextTier-spend).toLocaleString()}`;
+
+  // Coupons
+  const cl = document.getElementById('coupons-list');
+  if (coupons && coupons.length) {
+    cl.innerHTML = coupons.map(c => `
+      <div class="coupon">
+        <div class="coupon-icon">🎟️</div>
+        <div>
+          <div class="coupon-name">${c.name}</div>
+          <div class="coupon-exp">หมดอายุ: ${new Date(c.expires_at).toLocaleDateString('th-TH')}</div>
+        </div>
+        <button class="coupon-btn" onclick="useCoupon('${c.code}')">ใช้</button>
+      </div>`).join('');
+  }
+
+  // Badges
+  const bl = document.getElementById('badges-list');
+  bl.innerHTML = Object.entries(BADGES_META).map(([key,label]) => {
+    const earned = member.badges_earned && JSON.parse(member.badges_earned||'[]').includes(key);
+    return `<div style="background:${earned?'#fff3cd':'#f5f5f5'};border-radius:12px;padding:12px;text-align:center;opacity:${earned?1:0.4}">
+      <div style="font-size:28px">${label.split(' ')[0]}</div>
+      <div style="font-size:12px;margin-top:4px;color:#555">${label.split(' ').slice(1).join(' ')}</div>
+    </div>`;
+  }).join('');
+}
+
+function showTab(name, el) {
+  ['coupons','history','badges'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function editProfile() {
+  liff.openWindow({ url: location.origin+'/liff/edit-profile.html', external: false });
+}
+function useCoupon(code) {
+  liff.openWindow({ url: location.origin+'/liff/coupon.html?code='+code, external: false });
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
