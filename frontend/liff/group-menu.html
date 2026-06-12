@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เลือกเมนูหมู่คณะ — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh}
+
+.topbar{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(230,83,141,.3)}
+.topbar h1{font-size:16px;font-weight:800}
+.topbar p{font-size:11px;opacity:.85;margin-top:1px}
+
+/* Budget bar */
+.budget-bar{background:#fff;padding:14px 16px;border-bottom:2px solid var(--border);position:sticky;top:56px;z-index:99}
+.budget-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.budget-label{font-size:13px;color:var(--sub);font-weight:600}
+.budget-num{font-size:11px}
+.budget-input-row{display:flex;align-items:center;gap:10px}
+.budget-input{flex:1;padding:8px 14px;border:2px solid var(--border);border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;color:var(--text)}
+.budget-input:focus{outline:none;border-color:var(--blue)}
+.heads-input{width:70px;padding:8px 10px;border:2px solid var(--border);border-radius:10px;font-size:15px;font-weight:700;font-family:inherit;text-align:center;color:var(--text)}
+.heads-input:focus{outline:none;border-color:var(--pink)}
+
+/* Budget progress */
+.progress-wrap{position:relative;height:8px;background:var(--border);border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;border-radius:10px;transition:.3s;background:linear-gradient(90deg,var(--blue),var(--pink))}
+.progress-fill.over{background:linear-gradient(90deg,#f97316,#ef4444)}
+.progress-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-top:4px}
+.progress-labels .used{font-weight:700}
+.progress-labels .used.over{color:#ef4444}
+
+/* Category tabs */
+.cat-bar{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);scrollbar-width:none}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-btn{padding:6px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;background:#fff;cursor:pointer;white-space:nowrap;font-weight:600;flex-shrink:0;transition:.2s}
+.cat-btn.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+
+/* Menu list */
+.menu-list{padding:12px 14px;padding-bottom:130px}
+.menu-item{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.menu-emoji{font-size:36px;flex-shrink:0;width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e0f7fe,#fce4ec);border-radius:12px}
+.menu-info{flex:1}
+.menu-name{font-size:14px;font-weight:700;color:var(--text)}
+.menu-desc{font-size:11px;color:#aaa;margin-top:2px}
+.menu-price-tag{font-size:13px;font-weight:800;color:var(--pink);margin-top:3px}
+.qty-ctrl{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:2px solid var(--blue);background:#fff;color:var(--blue);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800;transition:.15s}
+.qty-btn.add{background:var(--blue);color:#fff}
+.qty-btn:active{transform:scale(.9)}
+.qty-num{font-size:16px;font-weight:800;min-width:20px;text-align:center;color:var(--text)}
+
+/* Bottom bar */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+.bottom-info{font-size:12px;color:var(--sub)}
+.bottom-total{font-size:20px;font-weight:800;color:var(--pink)}
+.bottom-btn{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border:none;padding:13px 20px;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;min-width:120px}
+.bottom-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Order summary modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s}
+.modal.open{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:24px 24px 0 0;padding:24px;width:100%;max-height:90vh;overflow-y:auto;transform:translateY(40px);transition:.25s}
+.modal.open .modal-box{transform:translateY(0)}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:4px;color:var(--pink)}
+.modal-sub{font-size:13px;color:var(--sub);margin-bottom:16px}
+.sum-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.sum-row:last-of-type{border-bottom:none}
+.sum-name{flex:1;color:var(--text)}
+.sum-amt{font-weight:700;color:var(--pink)}
+.sum-total-row{display:flex;justify-content:space-between;padding:12px 0;font-size:18px;font-weight:800;border-top:2px solid var(--pink);margin-top:8px;color:var(--text)}
+.sum-total-row span:last-child{color:var(--pink)}
+.per-head{font-size:13px;color:var(--sub);text-align:right;margin-bottom:12px}
+.confirm-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;margin-top:12px;cursor:pointer;font-family:inherit}
+.confirm-btn:disabled{opacity:.5}
+
+/* Loading */
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>🎉 จัดเซ็ตอาหารหมู่คณะ</h1>
+  <p>เลือกเมนูตามงบประมาณที่ต้องการ</p>
+</div>
+
+<div id="budgetBar" class="budget-bar">
+  <div class="budget-row">
+    <span class="budget-label">งบประมาณรวม (฿)</span>
+    <span class="budget-num" id="headLabel">สำหรับ 1 คน</span>
+  </div>
+  <div class="budget-input-row">
+    <input type="number" class="budget-input" id="budgetInput" value="3000" min="0" placeholder="งบรวม (฿)" oninput="updateBudget()">
+    <span style="font-size:13px;color:var(--sub)">÷</span>
+    <input type="number" class="heads-input" id="headsInput" value="8" min="1" placeholder="คน" oninput="updateBudget()">
+    <span style="font-size:13px;color:var(--sub);white-space:nowrap">คน</span>
+  </div>
+  <div style="margin-top:10px">
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-labels">
+      <span class="used" id="usedLabel">ใช้ไป ฿0</span>
+      <span id="remainLabel">เหลือ ฿3,000</span>
+    </div>
+  </div>
+</div>
+
+<div class="cat-bar" id="catBar"></div>
+<div id="menuList" class="menu-list"><div class="loading"><div class="loader"></div><p>โหลดเมนู...</p></div></div>
+
+<div class="bottom-bar">
+  <div>
+    <div class="bottom-info" id="selectedCount">เลือก 0 รายการ</div>
+    <div class="bottom-total" id="selectedTotal">฿0</div>
+  </div>
+  <button class="bottom-btn" id="summaryBtn" onclick="openSummary()" disabled>ดูสรุป</button>
+</div>
+
+<div class="modal" id="summaryModal">
+  <div class="modal-box" id="summaryBox"></div>
+</div>
+
+<script>
+const API='/api';
+let budget=3000,heads=8,cart={},allItems=[];
+let bookingId=new URLSearchParams(location.search).get('bookingId')||'';
+
+function formatThb(n){return Number(n).toLocaleString('th-TH');}
+function cartTotal(){return Object.values(cart).reduce((s,i)=>s+i.qty*i.price,0);}
+function cartCount(){return Object.values(cart).reduce((s,i)=>s+i.qty,0);}
+
+function updateBudget(){
+  budget=Number(document.getElementById('budgetInput').value)||0;
+  heads=Number(document.getElementById('headsInput').value)||1;
+  const perHead=Math.floor(budget/heads);
+  document.getElementById('headLabel').textContent=`฿${formatThb(perHead)}/คน`;
+  updateProgress();
+}
+
+function updateProgress(){
+  const used=cartTotal();
+  const pct=budget>0?Math.min(100,(used/budget)*100):0;
+  const over=used>budget;
+  const fill=document.getElementById('progressFill');
+  fill.style.width=pct+'%';
+  fill.className='progress-fill'+(over?' over':'');
+  const usedEl=document.getElementById('usedLabel');
+  usedEl.textContent=`ใช้ไป ฿${formatThb(used)}`;
+  usedEl.className='used'+(over?' over':'');
+  document.getElementById('remainLabel').textContent=over?`เกิน ฿${formatThb(used-budget)}`:`เหลือ ฿${formatThb(budget-used)}`;
+  const count=cartCount();
+  document.getElementById('selectedCount').textContent=`เลือก ${count} รายการ`;
+  document.getElementById('selectedTotal').textContent=`฿${formatThb(used)}`;
+  const btn=document.getElementById('summaryBtn');
+  if(btn)btn.disabled=count===0;
+}
+
+async function loadMenu(){
+  let items=sampleSetMenu();
+  try{
+    const r=await fetch(API+'/bookings/menu?branchId=1&type=group');
+    const d=await r.json();
+    if(d.items?.length)items=d.items;
+  }catch(e){}
+  allItems=items;
+  const cats=[...new Set(items.map(m=>m.category))];
+  const catBar=document.getElementById('catBar');
+  catBar.innerHTML=`<button class="cat-btn active" onclick="filterCat('all',this)">ทั้งหมด</button>`
+    +cats.map(c=>`<button class="cat-btn" onclick="filterCat('${c}',this)">${c}</button>`).join('');
+  renderMenuList(items);
+}
+
+function renderMenuList(items){
+  document.getElementById('menuList').innerHTML=items.map(item=>`
+    <div class="menu-item">
+      <div class="menu-emoji">${item.emoji||'🍽️'}</div>
+      <div class="menu-info">
+        <div class="menu-name">${item.name}</div>
+        <div class="menu-desc">${item.description||''}</div>
+        <div class="menu-price-tag">฿${formatThb(item.price)} / จาน</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+        <span class="qty-num" id="qty_${item.id}">${cart[item.id]?.qty||0}</span>
+        <button class="qty-btn add" onclick="changeQty('${item.id}',1)">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterCat(cat,btn){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMenuList(cat==='all'?allItems:allItems.filter(m=>m.category===cat));
+}
+
+function changeQty(itemId,delta){
+  const item=allItems.find(m=>String(m.id)===String(itemId));
+  if(!item)return;
+  if(!cart[itemId])cart[itemId]={...item,qty:0};
+  cart[itemId].qty=Math.max(0,cart[itemId].qty+delta);
+  if(cart[itemId].qty===0)delete cart[itemId];
+  const el=document.getElementById('qty_'+itemId);
+  if(el)el.textContent=cart[itemId]?.qty||0;
+  updateProgress();
+}
+
+function openSummary(){
+  const items=Object.values(cart);
+  const total=cartTotal();
+  const perHead=heads>0?(total/heads):0;
+  document.getElementById('summaryBox').innerHTML=`
+    <div class="modal-title">📋 สรุปเซ็ตอาหาร</div>
+    <div class="modal-sub">สำหรับ ${heads} คน · งบ ฿${formatThb(budget)}</div>
+    ${items.map(i=>`<div class="sum-row"><span class="sum-name">${i.name} × ${i.qty}</span><span class="sum-amt">฿${formatThb(i.qty*i.price)}</span></div>`).join('')}
+    <div class="sum-total-row"><span>รวมทั้งหมด</span><span>฿${formatThb(total)}</span></div>
+    <div class="per-head">เฉลี่ย ฿${formatThb(Math.round(perHead))} / คน</div>
+    ${total>budget?`<div style="background:#fef2f2;border-radius:10px;padding:10px;font-size:13px;color:#ef4444;margin-bottom:8px">⚠️ เกินงบ ฿${formatThb(total-budget)}</div>`:''}
+    <button class="confirm-btn" onclick="confirmOrder()">✅ ยืนยันรายการนี้</button>
+    <button onclick="document.getElementById('summaryModal').classList.remove('open')" style="width:100%;padding:12px;background:none;border:none;color:#aaa;font-size:14px;cursor:pointer;margin-top:8px;font-family:inherit">แก้ไขรายการ</button>`;
+  document.getElementById('summaryModal').classList.add('open');
+}
+
+async function confirmOrder(){
+  const btn=document.querySelector('.confirm-btn');
+  btn.disabled=true;btn.textContent='⏳ กำลังส่ง...';
+  const items=Object.values(cart).map(i=>({menuItemId:i.id,name:i.name,quantity:i.qty,unitPrice:i.price}));
+  try{
+    const res=await fetch(API+'/bookings/group/'+bookingId+'/menu',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({items,totalBudget:budget,headCount:heads})
+    });
+    const d=await res.json();
+    if(d.error)throw new Error(d.error);
+    // Close LIFF and return to chatbot
+    if(typeof liff!=='undefined'&&liff.isInClient()){liff.closeWindow();}
+    else{document.getElementById('summaryBox').innerHTML=`<div style="text-align:center;padding:40px"><div style="font-size:60px">🎉</div><h2 style="color:var(--pink);margin:12px 0">บันทึกรายการแล้ว!</h2><p style="color:var(--sub)">กลับไปที่ LINE เพื่อยืนยันการจอง</p></div>`;}
+  }catch(e){
+    btn.disabled=false;btn.textContent='✅ ยืนยันรายการนี้';
+    alert('เกิดข้อผิดพลาด: '+e.message);
+  }
+}
+
+function sampleSetMenu(){return[
+  {id:101,name:'ปูผัดผงกะหรี่',description:'ปูสดอ่างศิลา รสแซ่บ',price:380,category:'เมนูปู',emoji:'🦀'},
+  {id:102,name:'ปูนึ่ง (ใหญ่)',description:'ปูสดนึ่งกินกับน้ำจิ้ม',price:320,category:'เมนูปู',emoji:'🦀'},
+  {id:103,name:'ปูผัดพริกผงกาแฟ',description:'เมนูเด็ดประจำร้าน',price:400,category:'เมนูปู',emoji:'🦀'},
+  {id:104,name:'หอยนางรม (จาน)',description:'หอยสด 12 ชิ้น + น้ำจิ้ม',price:220,category:'อาหารทะเล',emoji:'🦪'},
+  {id:105,name:'กุ้งทอดกระเทียม',description:'กุ้งสดทอดกระเทียมพริกไทย',price:280,category:'อาหารทะเล',emoji:'🍤'},
+  {id:106,name:'ปลาหมึกย่าง',description:'ปลาหมึกสดย่างไฟถ่าน',price:250,category:'อาหารทะเล',emoji:'🦑'},
+  {id:107,name:'ต้มยำทะเลรวม (หม้อใหญ่)',description:'สำหรับ 4–6 คน',price:350,category:'ต้มยำ/แกง',emoji:'🍲'},
+  {id:108,name:'แกงส้มชะอมกุ้ง',description:'รสจัดจ้าน',price:220,category:'ต้มยำ/แกง',emoji:'🍛'},
+  {id:109,name:'ผัดผักรวม',description:'ผักสดผัดน้ำมันหอย',price:120,category:'ผัก',emoji:'🥬'},
+  {id:110,name:'ข้าวสวย (หม้อ)',description:'ข้าวหม้อสำหรับ 4 คน',price:80,category:'ข้าว/เครื่องดื่ม',emoji:'🍚'},
+  {id:111,name:'น้ำดื่มขวด (แพ็ค 6)',description:'',price:60,category:'ข้าว/เครื่องดื่ม',emoji:'💧'},
+  {id:112,name:'โซดา/น้ำอัดลม (แพ็ค 6)',description:'',price:90,category:'ข้าว/เครื่องดื่ม',emoji:'🥤'},
+];}
+
+window.addEventListener('load',()=>{
+  loadMenu();
+  updateBudget();
+});
+</script>
+</body>
+</html>
