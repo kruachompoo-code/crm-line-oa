@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walk-in — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-pink{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--blue);color:var(--blue)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 20px}
+.action-btn{padding:18px 8px;border:none;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.action-btn:active{transform:scale(.95)}
+.action-btn span{font-size:32px}
+.action-call{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.action-bill{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
+.success{text-align:center;padding:40px 20px}
+.success-icon{font-size:80px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--pink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
+.pts-badge{display:inline-block;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;margin-top:12px}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>Walk-in เช็คอิน</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+
+<script>
+// ★ เปลี่ยนเป็น Apps Script URL ของคุณหลัง deploy
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL';
+const LIFF_ID = '2010373258-AWWlnlW7';
+
+let profile = {};
+let checkedIn = false;
+let tableNo = '';
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    renderCheckin();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+  }
+}
+
+function renderCheckin() {
+  document.getElementById('app').innerHTML = `
+    <div class="card">
+      <h2>🍽 เช็คอินโต๊ะ</h2>
+      <div class="field"><label>หมายเลขโต๊ะ</label>
+        <input id="tableNo" type="number" placeholder="เช่น 5" min="1" max="50">
+      </div>
+      <div class="field"><label>จำนวนผู้เข้าใช้บริการ</label>
+        <select id="guests">
+          <option value="1">1 ท่าน</option>
+          <option value="2">2 ท่าน</option>
+          <option value="3">3 ท่าน</option>
+          <option value="4">4 ท่าน</option>
+          <option value="5">5 ท่าน</option>
+          <option value="6">6+ ท่าน</option>
+        </select>
+      </div>
+      <button class="btn btn-blue" onclick="submitCheckin()">✅ เช็คอิน</button>
+    </div>`;
+}
+
+async function submitCheckin() {
+  const t = document.getElementById('tableNo').value;
+  const g = document.getElementById('guests').value;
+  if (!t) { alert('กรุณาใส่หมายเลขโต๊ะ'); return; }
+  tableNo = t;
+  const btn = document.querySelector('.btn');
+  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ type:'walkin', lineUserId:profile.userId, displayName:profile.displayName, tableNo:t, guests:g }),
+    });
+    checkedIn = true;
+    renderSuccess(t, g);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '✅ เช็คอิน';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+function renderSuccess(t, g) {
+  document.getElementById('app').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">เช็คอินสำเร็จ!</div>
+      <div class="success-sub">โต๊ะ ${t} · ${g} ท่าน<br>ขอบคุณที่มาใช้บริการ 🦀</div>
+      <div class="pts-badge">+10 แต้ม</div>
+    </div>
+    <div class="actions">
+      <button class="action-btn action-call" onclick="callStaff()">
+        <span>🔔</span>เรียกพนักงาน
+      </button>
+      <button class="action-btn action-bill" onclick="checkBill()">
+        <span>🧾</span>เช็คบิล
+      </button>
+    </div>`;
+}
+
+async function callStaff() {
+  const btn = event.target.closest('button');
+  btn.disabled = true;
+  await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'callstaff', tableNo }) });
+  btn.textContent = '✅ เรียกแล้ว!';
+  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🔔</span>เรียกพนักงาน'; }, 5000);
+}
+
+async function checkBill() {
+  const btn = event.target.closest('button');
+  btn.disabled = true;
+  await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'checkbill', tableNo }) });
+  btn.textContent = '✅ ส่งแล้ว!';
+  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🧾</span>เช็คบิล'; }, 5000);
+}
+
+init();
+</script>
+</body>
+</html>
