@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เมนูหมู่คณะ — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:100px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.section{padding:16px 16px 0}
+.section-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.menu-item{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;justify-content:space-between;align-items:center}
+.menu-info{flex:1}
+.menu-name{font-size:15px;font-weight:700;color:var(--text)}
+.menu-desc{font-size:12px;color:var(--sub);margin-top:2px}
+.menu-price{font-size:16px;font-weight:800;color:var(--pink);margin-left:12px;white-space:nowrap}
+.qty-ctrl{display:flex;align-items:center;gap:8px;margin-top:8px}
+.qty-btn{width:30px;height:30px;border:2px solid var(--blue);background:#fff;border-radius:8px;font-size:18px;font-weight:800;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.qty-num{font-size:16px;font-weight:800;min-width:24px;text-align:center}
+.order-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--border);padding:14px 16px;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+.order-summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.order-total{font-size:16px;font-weight:800;color:var(--text)}
+.order-total span{color:var(--pink)}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.success{text-align:center;padding:60px 20px}
+.success-icon{font-size:80px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--pink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>เมนูหมู่คณะ</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+<div class="order-bar" id="orderBar" style="display:none">
+  <div class="order-summary">
+    <div class="order-total">ยอดรวม: <span id="totalPrice">฿0</span></div>
+    <div id="itemCount" style="font-size:13px;color:var(--sub)"></div>
+  </div>
+  <button class="btn" onclick="submitOrder()" id="submitBtn">📋 ส่งออเดอร์ให้พนักงาน</button>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+const LIFF_ID = '2010373258-mUIP7rrm';
+
+const MENU = [
+  { id:1, cat:'🦀 ปูทะเล', name:'ปูทะเลผัดผงกะหรี่', price:450, desc:'ปูสดขนาดใหญ่ ผัดผงกะหรี่กลิ่นหอม' },
+  { id:2, cat:'🦀 ปูทะเล', name:'ปูทะเลนึ่งน้ำจิ้มซีฟู้ด', price:400, desc:'ปูสดนึ่งสุก เสิร์ฟพร้อมน้ำจิ้ม' },
+  { id:3, cat:'🦀 ปูทะเล', name:'ปูทะเลผัดพริกไทยดำ', price:450, desc:'รสชาติเข้มข้น กลิ่นพริกไทยหอม' },
+  { id:4, cat:'🍤 อาหารทะเล', name:'กุ้งแม่น้ำเผา', price:350, desc:'กุ้งสดขนาดใหญ่ เผาไฟ' },
+  { id:5, cat:'🍤 อาหารทะเล', name:'หอยแมลงภู่ผัดน้ำพริกเผา', price:180, desc:'หอยสดผัดกับน้ำพริกเผา' },
+  { id:6, cat:'🍤 อาหารทะเล', name:'ปลาหมึกผัดกะเพรา', price:220, desc:'ปลาหมึกสดผัดกะเพราไฟแรง' },
+  { id:7, cat:'🥘 จานเด็ด', name:'ต้มยำกุ้งน้ำข้น', price:250, desc:'ต้มยำรสเข้มข้น กุ้งสด' },
+  { id:8, cat:'🥘 จานเด็ด', name:'ยำทะเลรวม', price:200, desc:'ทะเลรวมสดๆ รสจัดจ้าน' },
+  { id:9, cat:'🍚 ข้าว/เครื่องดื่ม', name:'ข้าวสวย', price:20, desc:'ข้าวหอมมะลิ' },
+  { id:10, cat:'🍚 ข้าว/เครื่องดื่ม', name:'น้ำดื่ม', price:15, desc:'น้ำเปล่าขวด' },
+];
+
+let profile = {};
+let orders = {};
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    renderMenu();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+  }
+}
+
+function renderMenu() {
+  const cats = [...new Set(MENU.map(m => m.cat))];
+  let html = '';
+  cats.forEach(cat => {
+    html += `<div class="section"><div class="section-title">${cat}</div>`;
+    MENU.filter(m => m.cat === cat).forEach(item => {
+      html += `<div class="menu-item">
+        <div class="menu-info">
+          <div class="menu-name">${item.name}</div>
+          <div class="menu-desc">${item.desc}</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+            <div class="qty-num" id="qty-${item.id}">0</div>
+            <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+          </div>
+        </div>
+        <div class="menu-price">฿${item.price}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('app').innerHTML = html;
+}
+
+function changeQty(id, delta) {
+  const item = MENU.find(m => m.id === id);
+  orders[id] = Math.max(0, (orders[id] || 0) + delta);
+  document.getElementById('qty-' + id).textContent = orders[id];
+  updateTotal();
+}
+
+function updateTotal() {
+  let total = 0, count = 0;
+  Object.entries(orders).forEach(([id, qty]) => {
+    if (qty > 0) { const item = MENU.find(m => m.id == id); total += item.price * qty; count += qty; }
+  });
+  document.getElementById('totalPrice').textContent = '฿' + total.toLocaleString();
+  document.getElementById('itemCount').textContent = count > 0 ? count + ' รายการ' : '';
+  document.getElementById('orderBar').style.display = count > 0 ? 'block' : 'none';
+}
+
+async function submitOrder() {
+  const items = Object.entries(orders)
+    .filter(([id, qty]) => qty > 0)
+    .map(([id, qty]) => { const item = MENU.find(m => m.id == id); return `${item.name} x${qty} (฿${item.price*qty})`; });
+  const total = Object.entries(orders).reduce((s, [id, qty]) => {
+    const item = MENU.find(m => m.id == id); return s + (qty > 0 ? item.price * qty : 0);
+  }, 0);
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({
+      type: 'groupmenu', lineUserId: profile.userId, displayName: profile.displayName,
+      items: items.join('\n'), total
+    })});
+    document.getElementById('app').innerHTML = `
+      <div class="success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">ส่งออเดอร์แล้ว!</div>
+        <div class="success-sub">พนักงานได้รับออเดอร์ของท่านแล้ว<br>ยอดรวม ฿${total.toLocaleString()}<br>กรุณารอสักครู่</div>
+      </div>`;
+    document.getElementById('orderBar').style.display = 'none';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📋 ส่งออเดอร์ให้พนักงาน';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
