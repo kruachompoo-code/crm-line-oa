@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>จองโต๊ะ — ครัวชมพู่ อ่างศิลา</title>
+<title>à¸à¸­à¸à¹à¸à¹à¸° â à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -34,11 +34,11 @@ body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100
 </style>
 </head>
 <body>
-<div class="topbar"><h1>📅 ครัวชมพู่ อ่างศิลา</h1><p>จองโต๊ะล่วงหน้า</p></div>
-<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+<div class="topbar"><h1>ð à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</h1><p>à¸à¸­à¸à¹à¸à¹à¸°à¸¥à¹à¸§à¸à¸«à¸à¹à¸²</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>à¸à¸³à¸¥à¸±à¸à¹à¸«à¸¥à¸...</p></div></div>
 
 <script>
-const GAS_URL = 'YOUR_APPS_SCRIPT_URL';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
 const LIFF_ID = '2010373258-4Wzc8get';
 
 let profile = {};
@@ -50,7 +50,7 @@ async function init() {
     profile = await liff.getProfile();
     renderForm();
   } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+    document.getElementById('app').innerHTML = '<div class="loading"><p>â à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸à¸´à¸à¹à¸¥à¹à¸§à¹à¸à¸´à¸à¹à¸«à¸¡à¹</p></div>';
   }
 }
 
@@ -58,20 +58,20 @@ function renderForm() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('app').innerHTML = `
     <div class="card">
-      <h2>📅 จองโต๊ะ</h2>
-      <div class="field"><label>ชื่อผู้จอง <span>*</span></label>
-        <input id="name" type="text" placeholder="ชื่อ-นามสกุล" value="${profile.displayName || ''}">
+      <h2>ð à¸à¸­à¸à¹à¸à¹à¸°</h2>
+      <div class="field"><label>à¸à¸·à¹à¸­à¸à¸¹à¹à¸à¸­à¸ <span>*</span></label>
+        <input id="name" type="text" placeholder="à¸à¸·à¹à¸­-à¸à¸²à¸¡à¸ªà¸à¸¸à¸¥" value="${profile.displayName || ''}">
       </div>
-      <div class="field"><label>เบอร์โทรศัพท์ <span>*</span></label>
+      <div class="field"><label>à¹à¸à¸­à¸£à¹à¹à¸à¸£à¸¨à¸±à¸à¸à¹ <span>*</span></label>
         <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
       </div>
       <div class="row2">
-        <div class="field"><label>วันที่ <span>*</span></label>
+        <div class="field"><label>à¸§à¸±à¸à¸à¸µà¹ <span>*</span></label>
           <input id="date" type="date" min="${today}">
         </div>
-        <div class="field"><label>เวลา <span>*</span></label>
+        <div class="field"><label>à¹à¸§à¸¥à¸² <span>*</span></label>
           <select id="time">
-            <option value="">เลือกเวลา</option>
+            <option value="">à¹à¸¥à¸·à¸­à¸à¹à¸§à¸¥à¸²</option>
             <option>11:00</option><option>11:30</option>
             <option>12:00</option><option>12:30</option>
             <option>13:00</option><option>13:30</option>
@@ -83,25 +83,25 @@ function renderForm() {
         </div>
       </div>
       <div class="row2">
-        <div class="field"><label>จำนวนท่าน <span>*</span></label>
+        <div class="field"><label>à¸à¸³à¸à¸§à¸à¸à¹à¸²à¸ <span>*</span></label>
           <select id="guests">
-            ${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}">${n} ท่าน</option>`).join('')}
-            <option value="9">9+ ท่าน</option>
+            ${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}">${n} à¸à¹à¸²à¸</option>`).join('')}
+            <option value="9">9+ à¸à¹à¸²à¸</option>
           </select>
         </div>
-        <div class="field"><label>ประเภทโต๊ะ</label>
+        <div class="field"><label>à¸à¸£à¸°à¹à¸ à¸à¹à¸à¹à¸°</label>
           <select id="tableType">
-            <option value="ทั่วไป">ทั่วไป</option>
-            <option value="ริมทะเล">ริมทะเล 🌊</option>
-            <option value="ห้องแอร์">ห้องแอร์ ❄️</option>
-            <option value="กลางแจ้ง">กลางแจ้ง 🌿</option>
+            <option value="à¸à¸±à¹à¸§à¹à¸">à¸à¸±à¹à¸§à¹à¸</option>
+            <option value="à¸£à¸´à¸¡à¸à¸°à¹à¸¥">à¸£à¸´à¸¡à¸à¸°à¹à¸¥ ð</option>
+            <option value="à¸«à¹à¸­à¸à¹à¸­à¸£à¹">à¸«à¹à¸­à¸à¹à¸­à¸£à¹ âï¸</option>
+            <option value="à¸à¸¥à¸²à¸à¹à¸à¹à¸">à¸à¸¥à¸²à¸à¹à¸à¹à¸ ð¿</option>
           </select>
         </div>
       </div>
-      <div class="field"><label>หมายเหตุ</label>
-        <textarea id="notes" rows="2" placeholder="แพ้อาหาร, วาระพิเศษ, ฯลฯ"></textarea>
+      <div class="field"><label>à¸«à¸¡à¸²à¸¢à¹à¸«à¸à¸¸</label>
+        <textarea id="notes" rows="2" placeholder="à¹à¸à¹à¸­à¸²à¸«à¸²à¸£, à¸§à¸²à¸£à¸°à¸à¸´à¹à¸¨à¸©, à¸¯à¸¥à¸¯"></textarea>
       </div>
-      <button class="btn btn-pink" onclick="submit()">📅 ยืนยันการจอง</button>
+      <button class="btn btn-pink" onclick="submit()">ð à¸¢à¸·à¸à¸¢à¸±à¸à¸à¸²à¸£à¸à¸­à¸</button>
     </div>`;
 }
 
@@ -111,9 +111,9 @@ async function submit() {
   const date  = document.getElementById('date').value;
   const time  = document.getElementById('time').value;
   const guests= document.getElementById('guests').value;
-  if (!name || !phone || !date || !time) { alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+  if (!name || !phone || !date || !time) { alert('à¸à¸£à¸¸à¸à¸²à¸à¸£à¸­à¸à¸à¹à¸­à¸¡à¸¹à¸¥à¸à¸µà¹à¸à¸³à¹à¸à¹à¸à¹à¸«à¹à¸à¸£à¸'); return; }
   const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
+  btn.disabled = true; btn.textContent = 'à¸à¸³à¸¥à¸±à¸à¸ªà¹à¸à¸à¹à¸­à¸¡à¸¹à¸¥...';
   try {
     const res = await fetch(GAS_URL, {
       method: 'POST',
@@ -129,22 +129,22 @@ async function submit() {
     const data = await res.json();
     renderSuccess(data.id, name, date, time, guests);
   } catch(e) {
-    btn.disabled = false; btn.textContent = '📅 ยืนยันการจอง';
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    btn.disabled = false; btn.textContent = 'ð à¸¢à¸·à¸à¸¢à¸±à¸à¸à¸²à¸£à¸à¸­à¸';
+    alert('à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸¥à¸­à¸à¹à¸«à¸¡à¹');
   }
 }
 
 function renderSuccess(id, name, date, time, guests) {
   document.getElementById('app').innerHTML = `
     <div class="success">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">จองโต๊ะสำเร็จ!</div>
+      <div class="success-icon">ð</div>
+      <div class="success-title">à¸à¸­à¸à¹à¸à¹à¸°à¸ªà¸³à¹à¸£à¹à¸!</div>
       <div class="success-sub">
-        คุณ${name}<br>
-        📅 ${date} เวลา ${time}<br>
-        👥 ${guests} ท่าน
+        à¸à¸¸à¸${name}<br>
+        ð ${date} à¹à¸§à¸¥à¸² ${time}<br>
+        ð¥ ${guests} à¸à¹à¸²à¸
       </div>
-      <div class="booking-id">รหัสการจอง: ${id}<br>ระบบจะส่งยืนยันผ่าน LINE</div>
+      <div class="booking-id">à¸£à¸«à¸±à¸ªà¸à¸²à¸£à¸à¸­à¸: ${id}<br>à¸£à¸°à¸à¸à¸à¸°à¸ªà¹à¸à¸¢à¸·à¸à¸¢à¸±à¸à¸à¹à¸²à¸ LINE</div>
     </div>`;
 }
 
