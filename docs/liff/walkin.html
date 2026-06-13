@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Walk-in â à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</title>
+<title>Walk-in — ครัวชมพู่ อ่างศิลา</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -41,11 +41,10 @@ body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100
 </style>
 </head>
 <body>
-<div class="topbar"><h1>ð¦ à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</h1><p>Walk-in à¹à¸à¹à¸à¸­à¸´à¸</p></div>
-<div id="app"><div class="loading"><div class="loader"></div><p>à¸à¸³à¸¥à¸±à¸à¹à¸«à¸¥à¸...</p></div></div>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>Walk-in เช็คอิน</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
 
 <script>
-// â à¹à¸à¸¥à¸µà¹à¸¢à¸à¹à¸à¹à¸ Apps Script URL à¸à¸­à¸à¸à¸¸à¸à¸«à¸¥à¸±à¸ deploy
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
 const LIFF_ID = '2010373258-AWWlnlW7';
 
@@ -60,38 +59,38 @@ async function init() {
     profile = await liff.getProfile();
     renderCheckin();
   } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>â à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸à¸´à¸à¹à¸¥à¹à¸§à¹à¸à¸´à¸à¹à¸«à¸¡à¹</p></div>';
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
   }
 }
 
 function renderCheckin() {
   document.getElementById('app').innerHTML = `
     <div class="card">
-      <h2>ð½ à¹à¸à¹à¸à¸­à¸´à¸à¹à¸à¹à¸°</h2>
-      <div class="field"><label>à¸«à¸¡à¸²à¸¢à¹à¸¥à¸à¹à¸à¹à¸°</label>
-        <input id="tableNo" type="number" placeholder="à¹à¸à¹à¸ 5" min="1" max="50">
+      <h2>🍽 เช็คอินโต๊ะ</h2>
+      <div class="field"><label>หมายเลขโต๊ะ</label>
+        <input id="tableNo" type="number" placeholder="เช่น 5" min="1" max="50">
       </div>
-      <div class="field"><label>à¸à¸³à¸à¸§à¸à¸à¸¹à¹à¹à¸à¹à¸²à¹à¸à¹à¸à¸£à¸´à¸à¸²à¸£</label>
+      <div class="field"><label>จำนวนผู้เข้าใช้บริการ</label>
         <select id="guests">
-          <option value="1">1 à¸à¹à¸²à¸</option>
-          <option value="2">2 à¸à¹à¸²à¸</option>
-          <option value="3">3 à¸à¹à¸²à¸</option>
-          <option value="4">4 à¸à¹à¸²à¸</option>
-          <option value="5">5 à¸à¹à¸²à¸</option>
-          <option value="6">6+ à¸à¹à¸²à¸</option>
+          <option value="1">1 ท่าน</option>
+          <option value="2">2 ท่าน</option>
+          <option value="3">3 ท่าน</option>
+          <option value="4">4 ท่าน</option>
+          <option value="5">5 ท่าน</option>
+          <option value="6">6+ ท่าน</option>
         </select>
       </div>
-      <button class="btn btn-blue" onclick="submitCheckin()">â à¹à¸à¹à¸à¸­à¸´à¸</button>
+      <button class="btn btn-blue" onclick="submitCheckin()">✅ เช็คอิน</button>
     </div>`;
 }
 
 async function submitCheckin() {
   const t = document.getElementById('tableNo').value;
   const g = document.getElementById('guests').value;
-  if (!t) { alert('à¸à¸£à¸¸à¸à¸²à¹à¸ªà¹à¸«à¸¡à¸²à¸¢à¹à¸¥à¸à¹à¸à¹à¸°'); return; }
+  if (!t) { alert('กรุณาใส่หมายเลขโต๊ะ'); return; }
   tableNo = t;
   const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'à¸à¸³à¸¥à¸±à¸à¸ªà¹à¸à¸à¹à¸­à¸¡à¸¹à¸¥...';
+  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
   try {
     await fetch(GAS_URL, {
       method: 'POST',
@@ -100,25 +99,25 @@ async function submitCheckin() {
     checkedIn = true;
     renderSuccess(t, g);
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'â à¹à¸à¹à¸à¸­à¸´à¸';
-    alert('à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸¥à¸­à¸à¹à¸«à¸¡à¹');
+    btn.disabled = false; btn.textContent = '✅ เช็คอิน';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
   }
 }
 
 function renderSuccess(t, g) {
   document.getElementById('app').innerHTML = `
     <div class="success">
-      <div class="success-icon">ð</div>
-      <div class="success-title">à¹à¸à¹à¸à¸­à¸´à¸à¸ªà¸³à¹à¸£à¹à¸!</div>
-      <div class="success-sub">à¹à¸à¹à¸° ${t} Â· ${g} à¸à¹à¸²à¸<br>à¸à¸­à¸à¸à¸¸à¸à¸à¸µà¹à¸¡à¸²à¹à¸à¹à¸à¸£à¸´à¸à¸²à¸£ ð¦</div>
-      <div class="pts-badge">+10 à¹à¸à¹à¸¡</div>
+      <div class="success-icon">🎉</div>
+      <div class="success-title">เช็คอินสำเร็จ!</div>
+      <div class="success-sub">โต๊ะ ${t} · ${g} ท่าน<br>ขอบคุณที่มาใช้บริการ 🦀</div>
+      <div class="pts-badge">+10 แต้ม</div>
     </div>
     <div class="actions">
       <button class="action-btn action-call" onclick="callStaff()">
-        <span>ð</span>à¹à¸£à¸µà¸¢à¸à¸à¸à¸±à¸à¸à¸²à¸
+        <span>🔔</span>เรียกพนักงาน
       </button>
       <button class="action-btn action-bill" onclick="checkBill()">
-        <span>ð§¾</span>à¹à¸à¹à¸à¸à¸´à¸¥
+        <span>🧾</span>เช็คบิล
       </button>
     </div>`;
 }
@@ -127,16 +126,16 @@ async function callStaff() {
   const btn = event.target.closest('button');
   btn.disabled = true;
   await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'callstaff', tableNo }) });
-  btn.textContent = 'â à¹à¸£à¸µà¸¢à¸à¹à¸¥à¹à¸§!';
-  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>ð</span>à¹à¸£à¸µà¸¢à¸à¸à¸à¸±à¸à¸à¸²à¸'; }, 5000);
+  btn.textContent = '✅ เรียกแล้ว!';
+  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🔔</span>เรียกพนักงาน'; }, 5000);
 }
 
 async function checkBill() {
   const btn = event.target.closest('button');
   btn.disabled = true;
   await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'checkbill', tableNo }) });
-  btn.textContent = 'â à¸ªà¹à¸à¹à¸¥à¹à¸§!';
-  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>ð§¾</span>à¹à¸à¹à¸à¸à¸´à¸¥'; }, 5000);
+  btn.textContent = '✅ ส่งแล้ว!';
+  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🧾</span>เช็คบิล'; }, 5000);
 }
 
 init();
