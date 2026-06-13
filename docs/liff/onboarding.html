@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ลงทะเบียน — ครัวชมพู่ อ่างศิลา</title>
+<title>à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸ â à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -40,16 +40,16 @@ body{font-family:'Noto Sans Thai',sans-serif;background:linear-gradient(160deg,#
 </head>
 <body>
 <div class="hero">
-  <div class="hero-icon">🦀</div>
-  <h1>ครัวชมพู่ อ่างศิลา</h1>
-  <p>ลงทะเบียนสมาชิกเพื่อสะสมแต้ม<br>และรับสิทธิพิเศษมากมาย</p>
+  <div class="hero-icon">ð¦</div>
+  <h1>à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</h1>
+  <p>à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸à¸ªà¸¡à¸²à¸à¸´à¸à¹à¸à¸·à¹à¸­à¸ªà¸°à¸ªà¸¡à¹à¸à¹à¸¡<br>à¹à¸¥à¸°à¸£à¸±à¸à¸ªà¸´à¸à¸à¸´à¸à¸´à¹à¸¨à¸©à¸¡à¸²à¸à¸¡à¸²à¸¢</p>
 </div>
 <div class="card" id="app">
-  <div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div>
+  <div class="loading"><div class="loader"></div><p>à¸à¸³à¸¥à¸±à¸à¹à¸«à¸¥à¸...</p></div>
 </div>
 
 <script>
-const GAS_URL = 'YOUR_APPS_SCRIPT_URL';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
 const LIFF_ID = '2010373258-QuvxXOnv';
 
 let profile = {};
@@ -61,7 +61,7 @@ async function init() {
     profile = await liff.getProfile();
     renderForm();
   } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด</p></div>';
+    document.getElementById('app').innerHTML = '<div class="loading"><p>â à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸</p></div>';
   }
 }
 
@@ -70,25 +70,25 @@ function renderForm() {
     <div class="profile-row">
       <img class="avatar" src="${profile.pictureUrl || ''}" onerror="this.style.display='none'">
       <div>
-        <div class="profile-name">${profile.displayName || 'ลูกค้า'}</div>
+        <div class="profile-name">${profile.displayName || 'à¸¥à¸¹à¸à¸à¹à¸²'}</div>
         <div class="profile-sub">LINE Account</div>
       </div>
     </div>
     <div class="perks">
-      <div class="perk"><div class="icon">🎯</div><div class="label">สะสมแต้ม</div></div>
-      <div class="perk"><div class="icon">🎁</div><div class="label">โปรพิเศษ</div></div>
-      <div class="perk"><div class="icon">🔔</div><div class="label">แจ้งเตือน</div></div>
+      <div class="perk"><div class="icon">ð¯</div><div class="label">à¸ªà¸°à¸ªà¸¡à¹à¸à¹à¸¡</div></div>
+      <div class="perk"><div class="icon">ð</div><div class="label">à¹à¸à¸£à¸à¸´à¹à¸¨à¸©</div></div>
+      <div class="perk"><div class="icon">ð</div><div class="label">à¹à¸à¹à¸à¹à¸à¸·à¸­à¸</div></div>
     </div>
-    <div class="field"><label>เบอร์โทรศัพท์</label>
+    <div class="field"><label>à¹à¸à¸­à¸£à¹à¹à¸à¸£à¸¨à¸±à¸à¸à¹</label>
       <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
     </div>
-    <button class="btn" onclick="submit()">🎉 ลงทะเบียนสมาชิก</button>`;
+    <button class="btn" onclick="submit()">ð à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸à¸ªà¸¡à¸²à¸à¸´à¸</button>`;
 }
 
 async function submit() {
   const phone = document.getElementById('phone').value.trim();
   const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'กำลังลงทะเบียน...';
+  btn.disabled = true; btn.textContent = 'à¸à¸³à¸¥à¸±à¸à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸...';
   try {
     await fetch(GAS_URL, {
       method: 'POST',
@@ -101,13 +101,13 @@ async function submit() {
     });
     document.getElementById('app').innerHTML = `
       <div class="success">
-        <div class="success-icon">🎉</div>
-        <div class="success-title">ลงทะเบียนสำเร็จ!</div>
-        <div class="success-sub">ยินดีต้อนรับสมาชิกใหม่<br>คุณ${profile.displayName || 'ลูกค้า'}<br>เริ่มสะสมแต้มได้เลย 🦀</div>
+        <div class="success-icon">ð</div>
+        <div class="success-title">à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸à¸ªà¸³à¹à¸£à¹à¸!</div>
+        <div class="success-sub">à¸¢à¸´à¸à¸à¸µà¸à¹à¸­à¸à¸£à¸±à¸à¸ªà¸¡à¸²à¸à¸´à¸à¹à¸«à¸¡à¹<br>à¸à¸¸à¸${profile.displayName || 'à¸¥à¸¹à¸à¸à¹à¸²'}<br>à¹à¸£à¸´à¹à¸¡à¸ªà¸°à¸ªà¸¡à¹à¸à¹à¸¡à¹à¸à¹à¹à¸¥à¸¢ ð¦</div>
       </div>`;
   } catch(e) {
-    btn.disabled = false; btn.textContent = '🎉 ลงทะเบียนสมาชิก';
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+    btn.disabled = false; btn.textContent = 'ð à¸¥à¸à¸à¸°à¹à¸à¸µà¸¢à¸à¸ªà¸¡à¸²à¸à¸´à¸';
+    alert('à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸¥à¸­à¸à¹à¸«à¸¡à¹');
   }
 }
 
