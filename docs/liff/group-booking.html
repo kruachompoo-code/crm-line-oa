@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>à¸à¸­à¸à¸«à¸¡à¸¹à¹à¸à¸à¸° â à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</title>
+<title>จองหมู่คณะ — ครัวชมพู่ อ่างศิลา</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -41,8 +41,8 @@ body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100
 </style>
 </head>
 <body>
-<div class="topbar"><h1>ð¥ à¸à¸£à¸±à¸§à¸à¸¡à¸à¸¹à¹ à¸­à¹à¸²à¸à¸¨à¸´à¸¥à¸²</h1><p>à¸à¸­à¸à¸«à¸¡à¸¹à¹à¸à¸à¸° / à¸­à¸µà¹à¸§à¸à¸à¹</p></div>
-<div id="app"><div class="loading"><div class="loader"></div><p>à¸à¸³à¸¥à¸±à¸à¹à¸«à¸¥à¸...</p></div></div>
+<div class="topbar"><h1>👥 ครัวชมพู่ อ่างศิลา</h1><p>จองหมู่คณะ / อีเวนต์</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
@@ -58,49 +58,49 @@ async function init() {
     profile = await liff.getProfile();
     renderForm();
   } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>â à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸à¸´à¸à¹à¸¥à¹à¸§à¹à¸à¸´à¸à¹à¸«à¸¡à¹</p></div>';
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
   }
 }
 
 const menuOptions = [
-  { id:'standard', icon:'ð½', name:'à¹à¸¡à¸à¸¹à¸¡à¸²à¸à¸£à¸à¸²à¸', price:'à¸¿350/à¸à¹à¸²à¸' },
-  { id:'premium',  icon:'ð¦', name:'à¹à¸¡à¸à¸¹ Premium', price:'à¸¿550/à¸à¹à¸²à¸' },
-  { id:'seafood',  icon:'ð¦', name:'à¸à¸µà¸à¸¹à¹à¸à¹à¸à¹à¸¡à¸£à¸¹à¸à¹à¸à¸', price:'à¸¿750/à¸à¹à¸²à¸' },
-  { id:'custom',   icon:'â¨', name:'à¸à¸³à¸«à¸à¸à¹à¸­à¸', price:'à¸à¸´à¸à¸à¹à¸­à¸à¸µà¸¡' },
+  { id:'standard', icon:'🍽', name:'เมนูมาตรฐาน', price:'฿350/ท่าน' },
+  { id:'premium',  icon:'🦀', name:'เมนู Premium', price:'฿550/ท่าน' },
+  { id:'seafood',  icon:'🦞', name:'ซีฟู้ดเต็มรูปแบบ', price:'฿750/ท่าน' },
+  { id:'custom',   icon:'✨', name:'กำหนดเอง', price:'ติดต่อทีม' },
 ];
 
 function renderForm() {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('app').innerHTML = `
     <div class="card">
-      <h2>ð¥ à¸à¸­à¸à¸«à¸¡à¸¹à¹à¸à¸à¸°</h2>
-      <p>à¹à¸«à¸¡à¸²à¸°à¸ªà¸³à¸«à¸£à¸±à¸à¸à¸¥à¸¸à¹à¸¡ 10 à¸à¹à¸²à¸à¸à¸¶à¹à¸à¹à¸ Â· à¸à¸²à¸à¹à¸¥à¸µà¹à¸¢à¸ Â· à¸ªà¸±à¸¡à¸¡à¸à¸² Â· à¸§à¸±à¸à¹à¸à¸´à¸</p>
-      <div class="field"><label>à¸à¸£à¸´à¸©à¸±à¸ / à¸à¸·à¹à¸­à¸à¸¥à¸¸à¹à¸¡ <span>*</span></label>
-        <input id="company" type="text" placeholder="à¹à¸à¹à¸ à¸à¸£à¸´à¸©à¸±à¸ ABC à¸à¸³à¸à¸±à¸">
+      <h2>👥 จองหมู่คณะ</h2>
+      <p>เหมาะสำหรับกลุ่ม 10 ท่านขึ้นไป · งานเลี้ยง · สัมมนา · วันเกิด</p>
+      <div class="field"><label>บริษัท / ชื่อกลุ่ม <span>*</span></label>
+        <input id="company" type="text" placeholder="เช่น บริษัท ABC จำกัด">
       </div>
       <div class="row2">
-        <div class="field"><label>à¸à¸·à¹à¸­à¸à¸¹à¹à¸à¸´à¸à¸à¹à¸­ <span>*</span></label>
-          <input id="contactName" type="text" placeholder="à¸à¸·à¹à¸­-à¸à¸²à¸¡à¸ªà¸à¸¸à¸¥" value="${profile.displayName || ''}">
+        <div class="field"><label>ชื่อผู้ติดต่อ <span>*</span></label>
+          <input id="contactName" type="text" placeholder="ชื่อ-นามสกุล" value="${profile.displayName || ''}">
         </div>
-        <div class="field"><label>à¹à¸à¸­à¸£à¹à¹à¸à¸£ <span>*</span></label>
+        <div class="field"><label>เบอร์โทร <span>*</span></label>
           <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
         </div>
       </div>
       <div class="row2">
-        <div class="field"><label>à¸§à¸±à¸à¸à¸µà¹à¸à¸±à¸à¸à¸²à¸ <span>*</span></label>
+        <div class="field"><label>วันที่จัดงาน <span>*</span></label>
           <input id="eventDate" type="date" min="${today}">
         </div>
-        <div class="field"><label>à¸à¸³à¸à¸§à¸à¸à¸¹à¹à¹à¸à¹à¸²à¸£à¹à¸§à¸¡ <span>*</span></label>
+        <div class="field"><label>จำนวนผู้เข้าร่วม <span>*</span></label>
           <select id="guests">
-            <option value="10-20">10â20 à¸à¹à¸²à¸</option>
-            <option value="21-30">21â30 à¸à¹à¸²à¸</option>
-            <option value="31-50">31â50 à¸à¹à¸²à¸</option>
-            <option value="51-100">51â100 à¸à¹à¸²à¸</option>
-            <option value="100+">100+ à¸à¹à¸²à¸</option>
+            <option value="10-20">10–20 ท่าน</option>
+            <option value="21-30">21–30 ท่าน</option>
+            <option value="31-50">31–50 ท่าน</option>
+            <option value="51-100">51–100 ท่าน</option>
+            <option value="100+">100+ ท่าน</option>
           </select>
         </div>
       </div>
-      <div class="field"><label>à¹à¸¥à¸·à¸­à¸à¹à¸¡à¸à¸¹ <span>*</span></label>
+      <div class="field"><label>เลือกเมนู <span>*</span></label>
         <div class="menu-grid" id="menuGrid">
           ${menuOptions.map(m=>`
             <div class="menu-opt${m.id===selectedMenu?' selected':''}" onclick="selectMenu('${m.id}')">
@@ -110,13 +110,13 @@ function renderForm() {
             </div>`).join('')}
         </div>
       </div>
-      <div class="field"><label>à¸à¸à¸à¸£à¸°à¸¡à¸²à¸à¹à¸à¸¢à¸à¸£à¸°à¸¡à¸²à¸</label>
-        <input id="budget" type="text" placeholder="à¹à¸à¹à¸ 30,000 à¸à¸²à¸">
+      <div class="field"><label>งบประมาณโดยประมาณ</label>
+        <input id="budget" type="text" placeholder="เช่น 30,000 บาท">
       </div>
-      <div class="field"><label>à¸£à¸²à¸¢à¸¥à¸°à¹à¸­à¸µà¸¢à¸à¹à¸à¸´à¹à¸¡à¹à¸à¸´à¸¡</label>
-        <textarea id="notes" rows="3" placeholder="à¸à¸§à¸²à¸¡à¸à¹à¸­à¸à¸à¸²à¸£à¸à¸´à¹à¸¨à¸©, à¸à¸µà¸¡à¸à¸²à¸, à¸­à¸¸à¸à¸à¸£à¸à¹à¸à¸µà¹à¸à¹à¸­à¸à¸à¸²à¸£..."></textarea>
+      <div class="field"><label>รายละเอียดเพิ่มเติม</label>
+        <textarea id="notes" rows="3" placeholder="ความต้องการพิเศษ, ธีมงาน, อุปกรณ์ที่ต้องการ..."></textarea>
       </div>
-      <button class="btn btn-blue" onclick="submit()">ð à¸ªà¹à¸à¹à¸à¸à¸­à¸</button>
+      <button class="btn btn-blue" onclick="submit()">📋 ส่งใบจอง</button>
     </div>`;
 }
 
@@ -131,9 +131,9 @@ async function submit() {
   const contactName = document.getElementById('contactName').value.trim();
   const phone       = document.getElementById('phone').value.trim();
   const eventDate   = document.getElementById('eventDate').value;
-  if (!company || !contactName || !phone || !eventDate) { alert('à¸à¸£à¸¸à¸à¸²à¸à¸£à¸­à¸à¸à¹à¸­à¸¡à¸¹à¸¥à¸à¸µà¹à¸à¸³à¹à¸à¹à¸à¹à¸«à¹à¸à¸£à¸'); return; }
+  if (!company || !contactName || !phone || !eventDate) { alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return; }
   const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'à¸à¸³à¸¥à¸±à¸à¸ªà¹à¸à¸à¹à¸­à¸¡à¸¹à¸¥...';
+  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
   try {
     const res = await fetch(GAS_URL, {
       method: 'POST',
@@ -151,21 +151,21 @@ async function submit() {
     const data = await res.json();
     renderSuccess(data.id, company, eventDate);
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'ð à¸ªà¹à¸à¹à¸à¸à¸­à¸';
-    alert('à¹à¸à¸´à¸à¸à¹à¸­à¸à¸´à¸à¸à¸¥à¸²à¸ à¸à¸£à¸¸à¸à¸²à¸¥à¸­à¸à¹à¸«à¸¡à¹');
+    btn.disabled = false; btn.textContent = '📋 ส่งใบจอง';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
   }
 }
 
 function renderSuccess(id, company, date) {
   document.getElementById('app').innerHTML = `
     <div class="success">
-      <div class="success-icon">ð</div>
-      <div class="success-title">à¸ªà¹à¸à¹à¸à¸à¸­à¸à¸ªà¸³à¹à¸£à¹à¸!</div>
+      <div class="success-icon">🎉</div>
+      <div class="success-title">ส่งใบจองสำเร็จ!</div>
       <div class="success-sub">
-        ${company}<br>ð ${date}<br>
-        à¸à¸µà¸¡à¸à¸²à¸à¸à¸°à¸à¸´à¸à¸à¹à¸­à¸à¸¥à¸±à¸à¸ à¸²à¸¢à¹à¸ 24 à¸à¸¡.
+        ${company}<br>📅 ${date}<br>
+        ทีมงานจะติดต่อกลับภายใน 24 ชม.
       </div>
-      <div class="booking-id">à¸£à¸«à¸±à¸ª: ${id}</div>
+      <div class="booking-id">รหัส: ${id}</div>
     </div>`;
 }
 
