@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>พนักงาน — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:30px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s}
+.field input:focus{border-color:var(--blue)}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-green{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff}
+.btn-pink{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.action-btn{padding:16px 8px;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.action-btn:active{transform:scale(.95)}
+.action-btn span{font-size:28px}
+.action-call{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.action-bill{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
+.action-checkin{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff}
+.action-book{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.success{text-align:center;padding:40px 20px}
+.success-icon{font-size:72px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:800;color:var(--green);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1.5px solid var(--green);color:var(--green);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;margin-top:12px}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.info-row{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border:none}
+.info-label{color:var(--sub);font-weight:600}
+.info-value{font-weight:700;color:var(--text)}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>หน้าจอพนักงาน</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+const LIFF_ID = '2010373258-GJyoXN30';
+
+let profile = {};
+let tableNo = '';
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    renderStaffPage();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+  }
+}
+
+function renderStaffPage() {
+  document.getElementById('app').innerHTML = `
+    <div class="card">
+      <h2>👤 ข้อมูลพนักงาน</h2>
+      <div class="info-row"><span class="info-label">ชื่อ LINE</span><span class="info-value">${profile.displayName}</span></div>
+    </div>
+    <div class="card">
+      <h2>🔔 จัดการโต๊ะ</h2>
+      <div class="field">
+        <label>หมายเลขโต๊ะที่ต้องการดำเนินการ</label>
+        <input type="number" id="tableNo" placeholder="เช่น 5" min="1" max="50" onchange="tableNo=this.value">
+      </div>
+      <div class="actions">
+        <button class="action-btn action-call" onclick="staffAction('arrived')">
+          <span>✅</span>รับทราบ<br>เรียกพนักงาน
+        </button>
+        <button class="action-btn action-bill" onclick="staffAction('bill_sent')">
+          <span>🧾</span>ส่งบิล<br>แล้ว
+        </button>
+        <button class="action-btn action-checkin" onclick="staffAction('checkin_verify')">
+          <span>📋</span>ยืนยัน<br>เช็คอิน
+        </button>
+        <button class="action-btn action-book" onclick="staffAction('booking_confirm')">
+          <span>📅</span>ยืนยัน<br>การจอง
+        </button>
+      </div>
+    </div>`;
+}
+
+async function staffAction(actionType) {
+  tableNo = document.getElementById('tableNo')?.value || '';
+  if (!tableNo && actionType !== 'booking_confirm') {
+    alert('กรุณาใส่หมายเลขโต๊ะก่อน'); return;
+  }
+  const labels = { arrived:'รับทราบการเรียกพนักงาน', bill_sent:'ส่งบิลแล้ว', checkin_verify:'ยืนยันเช็คอิน', booking_confirm:'ยืนยันการจองแล้ว' };
+
+  try {
+    await fetch(GAS_URL, { method:'POST', body: JSON.stringify({
+      type: 'staff_action', action: actionType, tableNo,
+      staffId: profile.userId, staffName: profile.displayName
+    })});
+    document.getElementById('app').innerHTML = `
+      <div class="success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">${labels[actionType]}</div>
+        <div class="succest-sub">โต๊ะ ${tableNo || '-'}<br>โดย: ${profile.displayName}</div>
+        <div class="badge">✅ บันทึกแล้ว</div>
+        <br><br>
+        <button class="btn btn-blue" onclick="renderStaffPage()" style="max-width:200px;margin:0 auto">กลับหน้าหลัก</button>
+      </div>`;
+  } catch(e) {
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
