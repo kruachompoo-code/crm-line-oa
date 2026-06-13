@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองโต๊ะ — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:30px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card h2{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.field label span{color:#e74c3c}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s;resize:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-pink{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.success{text-align:center;padding:40px 20px}
+.success-icon{font-size:80px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--pink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
+.booking-id{font-size:13px;background:var(--bg);border-radius:10px;padding:10px 16px;margin-top:12px;color:var(--sub)}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>📅 ครัวชมพู่ อ่างศิลา</h1><p>จองโต๊ะล่วงหน้า</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+
+<script>
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL';
+const LIFF_ID = '2010373258-4Wzc8get';
+
+let profile = {};
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    renderForm();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+  }
+}
+
+function renderForm() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('app').innerHTML = `
+    <div class="card">
+      <h2>📅 จองโต๊ะ</h2>
+      <div class="field"><label>ชื่อผู้จอง <span>*</span></label>
+        <input id="name" type="text" placeholder="ชื่อ-นามสกุล" value="${profile.displayName || ''}">
+      </div>
+      <div class="field"><label>เบอร์โทรศัพท์ <span>*</span></label>
+        <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="row2">
+        <div class="field"><label>วันที่ <span>*</span></label>
+          <input id="date" type="date" min="${today}">
+        </div>
+        <div class="field"><label>เวลา <span>*</span></label>
+          <select id="time">
+            <option value="">เลือกเวลา</option>
+            <option>11:00</option><option>11:30</option>
+            <option>12:00</option><option>12:30</option>
+            <option>13:00</option><option>13:30</option>
+            <option>17:00</option><option>17:30</option>
+            <option>18:00</option><option>18:30</option>
+            <option>19:00</option><option>19:30</option>
+            <option>20:00</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>จำนวนท่าน <span>*</span></label>
+          <select id="guests">
+            ${[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}">${n} ท่าน</option>`).join('')}
+            <option value="9">9+ ท่าน</option>
+          </select>
+        </div>
+        <div class="field"><label>ประเภทโต๊ะ</label>
+          <select id="tableType">
+            <option value="ทั่วไป">ทั่วไป</option>
+            <option value="ริมทะเล">ริมทะเล 🌊</option>
+            <option value="ห้องแอร์">ห้องแอร์ ❄️</option>
+            <option value="กลางแจ้ง">กลางแจ้ง 🌿</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>หมายเหตุ</label>
+        <textarea id="notes" rows="2" placeholder="แพ้อาหาร, วาระพิเศษ, ฯลฯ"></textarea>
+      </div>
+      <button class="btn btn-pink" onclick="submit()">📅 ยืนยันการจอง</button>
+    </div>`;
+}
+
+async function submit() {
+  const name  = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const date  = document.getElementById('date').value;
+  const time  = document.getElementById('time').value;
+  const guests= document.getElementById('guests').value;
+  if (!name || !phone || !date || !time) { alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return; }
+  const btn = document.querySelector('.btn');
+  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'reservation',
+        lineUserId: profile.userId,
+        displayName: profile.displayName,
+        name, phone, date, time, guests,
+        tableType: document.getElementById('tableType').value,
+        notes: document.getElementById('notes').value,
+      }),
+    });
+    const data = await res.json();
+    renderSuccess(data.id, name, date, time, guests);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📅 ยืนยันการจอง';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+function renderSuccess(id, name, date, time, guests) {
+  document.getElementById('app').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">จองโต๊ะสำเร็จ!</div>
+      <div class="success-sub">
+        คุณ${name}<br>
+        📅 ${date} เวลา ${time}<br>
+        👥 ${guests} ท่าน
+      </div>
+      <div class="booking-id">รหัสการจอง: ${id}<br>ระบบจะส่งยืนยันผ่าน LINE</div>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
