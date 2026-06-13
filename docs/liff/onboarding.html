@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ลงทะเบียน — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:linear-gradient(160deg,#e8f9fe 0%,#fce4ec 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.hero{text-align:center;margin-bottom:24px}
+.hero-icon{font-size:72px;margin-bottom:12px}
+.hero h1{font-size:24px;font-weight:800;color:var(--text);margin-bottom:6px}
+.hero p{font-size:14px;color:var(--sub);line-height:1.6}
+.card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.field input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s}
+.field input:focus{border-color:var(--blue)}
+.profile-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:12px;margin-bottom:16px}
+.avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.profile-name{font-weight:700;font-size:15px;color:var(--text)}
+.profile-sub{font-size:12px;color:var(--sub)}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;transition:.15s;margin-top:4px}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.perks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0}
+.perk{background:var(--bg);border-radius:12px;padding:12px 8px;text-align:center}
+.perk .icon{font-size:24px;margin-bottom:4px}
+.perk .label{font-size:11px;font-weight:600;color:var(--sub)}
+.success{text-align:center;padding:20px 0}
+.success-icon{font-size:72px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--pink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
+.loading{text-align:center;padding:40px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-icon">🦀</div>
+  <h1>ครัวชมพู่ อ่างศิลา</h1>
+  <p>ลงทะเบียนสมาชิกเพื่อสะสมแต้ม<br>และรับสิทธิพิเศษมากมาย</p>
+</div>
+<div class="card" id="app">
+  <div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div>
+</div>
+
+<script>
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL';
+const LIFF_ID = '2010373258-QuvxXOnv';
+
+let profile = {};
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    renderForm();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด</p></div>';
+  }
+}
+
+function renderForm() {
+  document.getElementById('app').innerHTML = `
+    <div class="profile-row">
+      <img class="avatar" src="${profile.pictureUrl || ''}" onerror="this.style.display='none'">
+      <div>
+        <div class="profile-name">${profile.displayName || 'ลูกค้า'}</div>
+        <div class="profile-sub">LINE Account</div>
+      </div>
+    </div>
+    <div class="perks">
+      <div class="perk"><div class="icon">🎯</div><div class="label">สะสมแต้ม</div></div>
+      <div class="perk"><div class="icon">🎁</div><div class="label">โปรพิเศษ</div></div>
+      <div class="perk"><div class="icon">🔔</div><div class="label">แจ้งเตือน</div></div>
+    </div>
+    <div class="field"><label>เบอร์โทรศัพท์</label>
+      <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
+    </div>
+    <button class="btn" onclick="submit()">🎉 ลงทะเบียนสมาชิก</button>`;
+}
+
+async function submit() {
+  const phone = document.getElementById('phone').value.trim();
+  const btn = document.querySelector('.btn');
+  btn.disabled = true; btn.textContent = 'กำลังลงทะเบียน...';
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'register',
+        lineUserId: profile.userId,
+        displayName: profile.displayName,
+        phone,
+      }),
+    });
+    document.getElementById('app').innerHTML = `
+      <div class="success">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">ลงทะเบียนสำเร็จ!</div>
+        <div class="success-sub">ยินดีต้อนรับสมาชิกใหม่<br>คุณ${profile.displayName || 'ลูกค้า'}<br>เริ่มสะสมแต้มได้เลย 🦀</div>
+      </div>`;
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '🎉 ลงทะเบียนสมาชิก';
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
