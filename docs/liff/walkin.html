@@ -2,140 +2,234 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Walk-in — ครัวชมพู่ อ่างศิลา</title>
+<title>Walk-in / เข้าใช้บริการ — ครัวชมพู่ อ่างศิลา</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#10b981}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
 .topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
 .topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
-.card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.card h2{font-size:16px;font-weight:800;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
-.field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s}
-.field input:focus,.field select:focus{border-color:var(--blue)}
-.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
-.btn:active{transform:scale(.97)}
-.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
-.btn-pink{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
-.btn-outline{background:#fff;border:2px solid var(--blue);color:var(--blue)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 20px}
-.action-btn{padding:18px 8px;border:none;border-radius:16px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.welcome-card{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;margin:16px;border-radius:20px;padding:24px 20px;text-align:center}
+.wc-emoji{font-size:48px;margin-bottom:8px}
+.wc-name{font-size:20px;font-weight:800;margin-bottom:4px}
+.wc-sub{font-size:13px;opacity:.8}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 16px}
+.action-btn{background:#fff;border-radius:18px;padding:20px 16px;text-align:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.08);transition:.15s;border:2px solid transparent}
 .action-btn:active{transform:scale(.95)}
-.action-btn span{font-size:32px}
-.action-call{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
-.action-bill{background:linear-gradient(135deg,var(--pink),#c2185b);color:#fff}
-.success{text-align:center;padding:40px 20px}
-.success-icon{font-size:80px;margin-bottom:16px}
-.success-title{font-size:22px;font-weight:800;color:var(--pink);margin-bottom:8px}
-.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
-.pts-badge{display:inline-block;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;margin-top:12px}
-.loading{text-align:center;padding:60px 20px;color:var(--sub)}
-.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.hidden{display:none}
+.action-btn.primary{border-color:var(--pink);background:linear-gradient(135deg,rgba(77,200,244,.06),rgba(230,83,141,.06))}
+.action-btn .ab-icon{font-size:36px;margin-bottom:8px}
+.action-btn .ab-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px}
+.action-btn .ab-sub{font-size:11px;color:var(--sub);line-height:1.4}
+.card{background:#fff;border-radius:16px;margin:0 16px 12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.card-title{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:.2s;background:#fff}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.points-card{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px 20px;margin:0 16px 12px;display:flex;justify-content:space-between;align-items:center}
+.pts-label{font-size:13px;opacity:.9}
+.pts-value{font-size:24px;font-weight:800}
+.pts-sub{font-size:11px;opacity:.8}
+.staff-btn-area{margin:0 16px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.staff-btn{padding:14px;background:#fff;border:2px solid var(--border);border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;transition:.15s}
+.staff-btn.alert{border-color:var(--pink);color:var(--pink)}
+.staff-btn.bill{border-color:var(--blue);color:var(--blue)}
+.staff-btn:active{transform:scale(.96)}
+.staff-btn .sb-icon{font-size:24px;display:block;margin-bottom:4px}
+.btn-wrap{padding:0 16px 20px}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;margin-bottom:10px}
+.btn:active{transform:scale(.97)}
+.btn-outline{background:#fff;border:2px solid var(--border);color:var(--text)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 20px;border-radius:50px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:.3s;white-space:nowrap}
+.toast.show{opacity:1}
+.success-screen{text-align:center;padding:40px 20px}
+.s-icon{font-size:72px;margin-bottom:16px;animation:pop .4s}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.s-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
+.s-sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:20px}
+.check-in-ref{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:2px}
+.view-hidden{display:none}
 </style>
 </head>
 <body>
-<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>Walk-in เช็คอิน</p></div>
-<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+<div class="topbar"><h1>🏠 Walk-in เข้าใช้บริการ</h1><p>ยินดีต้อนรับสู่ครัวชมพู่ อ่างศิลา</p></div>
+
+<div id="loading" style="text-align:center;padding:60px 20px">
+  <div style="font-size:52px;margin-bottom:16px">🔄</div>
+  <div style="font-size:16px;font-weight:700;color:var(--text)">กำลังโหลด...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="welcome-card">
+    <div class="wc-emoji">👋</div>
+    <div class="wc-name" id="welcome-name">ยินดีต้อนรับ</div>
+    <div class="wc-sub">ครัวชมพู่ อ่างศิลา — วันนี้มีเมนูสดใหม่รออยู่!</div>
+  </div>
+
+  <div class="points-card" id="points-card" style="display:none">
+    <div>
+      <div class="pts-label">แต้มสะสม</div>
+      <div class="pts-value" id="pts-value">0</div>
+      <div class="pts-sub">แต้ม</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:12px;opacity:.9">ระดับสมาชิก</div>
+      <div style="font-size:16px;font-weight:800" id="tier-name">—</div>
+    </div>
+  </div>
+
+  <!-- Check-in form for new visitors -->
+  <div id="checkin-section">
+    <div class="card">
+      <div class="card-title">📝 ลงทะเบียนเข้าใช้บริการ</div>
+      <div class="row2">
+        <div class="form-group"><label>จำนวนผู้เข้าใช้ *</label>
+          <select id="guest-count">
+            <option value="">เลือก</option>
+            <option value="1">1 คน</option><option value="2">2 คน</option>
+            <option value="3">3 คน</option><option value="4">4 คน</option>
+            <option value="5">5 คน</option><option value="6">6 คน</option>
+            <option value="7">7 คน</option><option value="8">8 คน</option>
+            <option value="10+">10+ คน</option>
+          </select>
+        </div>
+        <div class="form-group"><label>โต๊ะ (ถ้าทราบ)</label><input type="text" id="table-no" placeholder="เช่น T01"></div>
+      </div>
+      <div class="form-group"><label>หมายเหตุ</label>
+        <textarea id="checkin-note" rows="2" placeholder="แพ้อาหาร / มีเด็ก / ขอเก้าอี้พิเศษ..."></textarea>
+      </div>
+    </div>
+    <div class="btn-wrap">
+      <button class="btn" onclick="doCheckIn()">✅ เช็คอิน เข้าใช้บริการ</button>
+    </div>
+  </div>
+
+  <!-- Actions for checked-in customers -->
+  <div id="action-section" class="view-hidden">
+    <div class="action-grid">
+      <div class="action-btn primary" onclick="callStaff()">
+        <div class="ab-icon">🔔</div>
+        <div class="ab-title">เรียกพนักงาน</div>
+        <div class="ab-sub">แจ้งพนักงานมาที่โต๊ะ</div>
+      </div>
+      <div class="action-btn" onclick="checkBill()">
+        <div class="ab-icon">🧾</div>
+        <div class="ab-title">เช็คบิล</div>
+        <div class="ab-sub">ดูยอดและชำระเงิน</div>
+      </div>
+      <div class="action-btn" onclick="viewMenu()">
+        <div class="ab-icon">🍽️</div>
+        <div class="ab-title">ดูเมนู</div>
+        <div class="ab-sub">เพิ่มรายการสั่ง</div>
+      </div>
+      <div class="action-btn" onclick="goPromo()">
+        <div class="ab-icon">🎁</div>
+        <div class="ab-title">โปรโมชัน</div>
+        <div class="ab-sub">ดีลพิเศษวันนี้</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
+const LIFF_ID = '2010373258-WALKIN01';
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
-const LIFF_ID = '2010373258-AWWlnlW7';
-
-let profile = {};
-let checkedIn = false;
-let tableNo = '';
+const BASE = 'https://kruachompoo-code.github.io/crm-line-oa/docs/liff';
+let profile = {}, memberData = null, checkInRef = null;
 
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) { liff.login(); return; }
     profile = await liff.getProfile();
-    renderCheckin();
-  } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
-  }
-}
-
-function renderCheckin() {
-  document.getElementById('app').innerHTML = `
-    <div class="card">
-      <h2>🍽 เช็คอินโต๊ะ</h2>
-      <div class="field"><label>หมายเลขโต๊ะ</label>
-        <input id="tableNo" type="number" placeholder="เช่น 5" min="1" max="50">
-      </div>
-      <div class="field"><label>จำนวนผู้เข้าใช้บริการ</label>
-        <select id="guests">
-          <option value="1">1 ท่าน</option>
-          <option value="2">2 ท่าน</option>
-          <option value="3">3 ท่าน</option>
-          <option value="4">4 ท่าน</option>
-          <option value="5">5 ท่าน</option>
-          <option value="6">6+ ท่าน</option>
-        </select>
-      </div>
-      <button class="btn btn-blue" onclick="submitCheckin()">✅ เช็คอิน</button>
-    </div>`;
-}
-
-async function submitCheckin() {
-  const t = document.getElementById('tableNo').value;
-  const g = document.getElementById('guests').value;
-  if (!t) { alert('กรุณาใส่หมายเลขโต๊ะ'); return; }
-  tableNo = t;
-  const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
+  } catch(e) {}
+  
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('welcome-name').textContent = `ยินดีต้อนรับคุณ ${profile.displayName || 'แขกผู้มีเกียรติ'}`;
+  
+  // Check member & points
   try {
-    await fetch(GAS_URL, {
+    const res = await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ type:'walkin', lineUserId:profile.userId, displayName:profile.displayName, tableNo:t, guests:g }),
-    });
-    checkedIn = true;
-    renderSuccess(t, g);
-  } catch(e) {
-    btn.disabled = false; btn.textContent = '✅ เช็คอิน';
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      body: JSON.stringify({ type: 'get_member', lineUserId: profile.userId || '' })
+    }).then(r => r.json());
+    if (res?.found) {
+      memberData = res;
+      document.getElementById('points-card').style.display = 'flex';
+      document.getElementById('pts-value').textContent = (res.points || 0).toLocaleString();
+      document.getElementById('tier-name').textContent = res.tier || 'Silver';
+    }
+  } catch(e) {}
+  
+  // Check if already checked-in today
+  const savedRef = sessionStorage.getItem('checkin_ref');
+  if (savedRef) {
+    checkInRef = savedRef;
+    showActionSection();
   }
 }
 
-function renderSuccess(t, g) {
-  document.getElementById('app').innerHTML = `
-    <div class="success">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">เช็คอินสำเร็จ!</div>
-      <div class="success-sub">โต๊ะ ${t} · ${g} ท่าน<br>ขอบคุณที่มาใช้บริการ 🦀</div>
-      <div class="pts-badge">+10 แต้ม</div>
-    </div>
-    <div class="actions">
-      <button class="action-btn action-call" onclick="callStaff()">
-        <span>🔔</span>เรียกพนักงาน
-      </button>
-      <button class="action-btn action-bill" onclick="checkBill()">
-        <span>🧾</span>เช็คบิล
-      </button>
-    </div>`;
+async function doCheckIn() {
+  const guests = document.getElementById('guest-count').value;
+  if (!guests) { alert('กรุณาระบุจำนวนผู้เข้าใช้บริการ'); return; }
+  
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'walkin_checkin',
+      lineUserId: profile.userId || 'anonymous',
+      displayName: profile.displayName || '',
+      guests: guests,
+      tableNo: document.getElementById('table-no').value.trim(),
+      note: document.getElementById('checkin-note').value.trim()
+    })
+  }).then(r => r.json()).catch(() => ({}));
+  
+  checkInRef = res?.checkInRef || 'WI-' + Date.now().toString().slice(-6);
+  sessionStorage.setItem('checkin_ref', checkInRef);
+  showToast('✅ เช็คอินเรียบร้อย! หมายเลข: ' + checkInRef);
+  setTimeout(() => showActionSection(), 1500);
+}
+
+function showActionSection() {
+  document.getElementById('checkin-section').style.display = 'none';
+  document.getElementById('action-section').classList.remove('view-hidden');
 }
 
 async function callStaff() {
-  const btn = event.target.closest('button');
-  btn.disabled = true;
-  await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'callstaff', tableNo }) });
-  btn.textContent = '✅ เรียกแล้ว!';
-  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🔔</span>เรียกพนักงาน'; }, 5000);
+  showToast('🔔 กำลังแจ้งพนักงาน...');
+  await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'call_staff',
+      lineUserId: profile.userId || 'anonymous',
+      displayName: profile.displayName || '',
+      checkInRef: checkInRef || ''
+    })
+  }).catch(() => {});
+  setTimeout(() => showToast('✅ แจ้งพนักงานแล้ว — กำลังมา!'), 800);
 }
 
-async function checkBill() {
-  const btn = event.target.closest('button');
-  btn.disabled = true;
-  await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'checkbill', tableNo }) });
-  btn.textContent = '✅ ส่งแล้ว!';
-  setTimeout(() => { btn.disabled = false; btn.innerHTML = '<span>🧾</span>เช็คบิล'; }, 5000);
+function checkBill() {
+  liff.openWindow({ url: BASE + '/cashbill.html', external: false });
+}
+function viewMenu() {
+  liff.openWindow({ url: BASE + '/group-menu.html', external: false });
+}
+function goPromo() {
+  liff.openWindow({ url: BASE + '/promotion.html', external: false });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 init();
