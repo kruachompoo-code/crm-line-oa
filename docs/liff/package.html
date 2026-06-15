@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แพ็กเกจกลุ่ม — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.hero{margin:16px;background:linear-gradient(135deg,#1a1a2e,#2d2d5e);border-radius:16px;padding:20px;text-align:center;color:#fff}
+.hero h2{font-size:17px;font-weight:800;margin-bottom:4px}
+.hero p{font-size:12px;opacity:.75;line-height:1.5}
+.packages{padding:0 16px;display:flex;flex-direction:column;gap:16px}
+.pkg{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.pkg-banner{padding:24px 20px;display:flex;align-items:center;gap:16px}
+.pkg-icon{font-size:48px}
+.pkg-header{flex:1}
+.pkg-name{font-size:18px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pkg-price-tag{font-size:14px;color:rgba(255,255,255,.85);font-weight:600;margin-top:2px}
+.pkg-body{padding:16px 20px}
+.pkg-items{list-style:none;margin-bottom:16px}
+.pkg-items li{font-size:13px;color:var(--sub);padding:5px 0;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:8px}
+.pkg-items li:last-child{border-bottom:none}
+.pkg-items li::before{content:'✓';color:var(--green,#22c55e);font-weight:700;flex-shrink:0}
+.pkg-footer{display:flex;align-items:center;justify-content:space-between}
+.pkg-min{font-size:12px;color:var(--sub)}
+.btn-pkg{padding:10px 20px;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;color:#fff;transition:.15s}
+.btn-pkg:active{transform:scale(.96)}
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-bottom:8px}
+.badge-hot{background:#fee2e2;color:#dc2626}
+.badge-popular{background:#fef9c3;color:#a16207}
+.badge-vip{background:#f3e8ff;color:#7c3aed}
+.note-box{margin:16px;background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);font-size:12px;color:var(--sub);line-height:1.7;text-align:center}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>แพ็กเกจกลุ่ม — Group Packages</p></div>
+
+<div class="hero">
+  <h2>🎉 จัดเลี้ยงกลุ่มกับเรา</h2>
+  <p>แพ็กเกจครบ รสชาติดี บรรยากาศริมทะเล<br>รับกลุ่ม 5–100+ ท่าน มีห้องแยกสำหรับงานใหญ่</p>
+</div>
+
+<div class="packages">
+
+  <div class="pkg">
+    <div class="pkg-banner" style="background:linear-gradient(135deg,#4dc8f4,#38b2d8)">
+      <div class="pkg-icon">🍽️</div>
+      <div class="pkg-header">
+        <div class="pkg-name">Basic Package</div>
+        <div class="pkg-price-tag">สั่งจากเมนูปกติ • ไม่มีขั้นต่ำ</div>
+      </div>
+    </div>
+    <div class="pkg-body">
+      <span class="badge badge-hot">เหมาะมือใหม่</span>
+      <ul class="pkg-items">
+        <li>อาหารทะเลสดจากเมนู 100+ รายการ</li>
+        <li>ข้าวสวย น้ำจิ้มซีฟู้ดเสิร์ฟฟรี</li>
+        <li>บรรยากาศริมทะเลอ่างศิลา</li>
+        <li>รองรับทุกขนาดกลุ่ม</li>
+      </ul>
+      <div class="pkg-footer">
+        <div class="pkg-min">ขั้นต่ำ: ไม่มี</div>
+        <button class="btn-pkg" style="background:linear-gradient(135deg,#4dc8f4,#38b2d8)" onclick="goBook('PKG_BASIC')">จองเลย →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="pkg-banner" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+      <div class="pkg-icon">🦐</div>
+      <div class="pkg-header">
+        <div class="pkg-name">แพ็กเกจ A</div>
+        <div class="pkg-price-tag">399 บาท/ท่าน • ขั้นต่ำ 5 ท่าน</div>
+      </div>
+    </div>
+    <div class="pkg-body">
+      <span class="badge badge-popular">ยอดนิยม</span>
+      <ul class="pkg-items">
+        <li>กุ้งแชบ๊วย 500g/โต๊ะ</li>
+        <li>ปลาหมึกผัดกระเพรา / ทอดกระเทียม</li>
+        <li>หอยแมลงภู่ผัดซอส</li>
+        <li>ต้มยำทะเล 1 หม้อ</li>
+        <li>ข้าวสวยไม่จำกัด + น้ำจิ้ม</li>
+      </ul>
+      <div class="pkg-footer">
+        <div class="pkg-min">ขั้นต่ำ: 5 ท่าน</div>
+        <button class="btn-pkg" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="goBook('PKG_A')">จองเลย →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="pkg-banner" style="background:linear-gradient(135deg,#e6538d,#c0396e)">
+      <div class="pkg-icon">🦞</div>
+      <div class="pkg-header">
+        <div class="pkg-name">แพ็กเกจ B</div>
+        <div class="pkg-price-tag">599 บาท/ท่าน • ขั้นต่ำ 8 ท่าน</div>
+      </div>
+    </div>
+    <div class="pkg-body">
+      <span class="badge badge-hot">ขายดีสุด</span>
+      <ul class="pkg-items">
+        <li>กุ้งแม่น้ำนึ่งกระเทียม (ขนาดกลาง) 3 ตัว/ท่าน</li>
+        <li>ปูม้านึ่ง 1 ตัว/ท่าน</li>
+        <li>ปลาทับทิมนึ่งมะนาว</li>
+        <li>หอยลาย/หอยแครง ผัดซอส</li>
+        <li>ต้มยำทะเลรวม + ผัดผัก</li>
+        <li>ข้าวสวย + น้ำจิ้ม + ของหวาน</li>
+      </ul>
+      <div class="pkg-footer">
+        <div class="pkg-min">ขั้นต่ำ: 8 ท่าน</div>
+        <button class="btn-pkg" style="background:linear-gradient(135deg,#e6538d,#c0396e)" onclick="goBook('PKG_B')">จองเลย →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="pkg-banner" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">
+      <div class="pkg-icon">👑</div>
+      <div class="pkg-header">
+        <div class="pkg-name">แพ็กเกจ VIP</div>
+        <div class="pkg-price-tag">899 บาท/ท่าน • ขั้นต่ำ 10 ท่าน</div>
+      </div>
+    </div>
+    <div class="pkg-body">
+      <span class="badge badge-vip">Premium</span>
+      <ul class="pkg-items">
+        <li>กุ้งมังกร (Australian Lobster) 1 ตัว/2 ท่าน</li>
+        <li>ปูทะเลนึ่ง 1 ตัว/ท่าน</li>
+        <li>ปลาหิมะนึ่งซีอิ๊ว</li>
+        <li>ซีฟู้ดรวมพรีเมียม</li>
+        <li>ต้มยำกุ้งแม่น้ำ</li>
+        <li>ไวน์ขาว 1 ขวด/โต๊ะ + ของหวาน</li>
+        <li>ห้องแยก Private พร้อม A/C</li>
+      </ul>
+      <div class="pkg-footer">
+        <div class="pkg-min">ขั้นต่ำ: 10 ท่าน</div>
+        <button class="btn-pkg" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)" onclick="goBook('PKG_VIP')">จองเลย →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="note-box">
+  📞 ต้องการแพ็กเกจพิเศษหรือราคา Custom?<br>
+  ติดต่อเราผ่าน LINE OA ได้เลย!<br>
+  <strong>ราคานี้ยังไม่รวม VAT 7%</strong>
+</div>
+
+<script>
+const LIFF_ID = '2010373258-PACKAGE01';
+let profile = {};
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+  } catch(e) {}
+}
+function goBook(pkg) {
+  liff.openWindow({ url: 'https://kruachompoo-code.github.io/crm-line-oa/docs/liff/group-booking.html?pkg='+pkg, external: false });
+}
+init();
+</script>
+</body>
+</html>
