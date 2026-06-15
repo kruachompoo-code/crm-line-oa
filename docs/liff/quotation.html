@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ใบเสนอราคา — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.quotation{background:#fff;margin:16px;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.quot-header{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);padding:24px 20px;color:#fff}
+.quot-logo{font-size:28px;margin-bottom:4px}
+.quot-biz{font-size:16px;font-weight:800;margin-bottom:2px}
+.quot-addr{font-size:11px;opacity:.75;line-height:1.5}
+.quot-meta{padding:16px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meta-row{font-size:12px;color:var(--sub)}
+.meta-row strong{color:var(--text);font-size:13px}
+.quot-table{width:100%;border-collapse:collapse}
+.quot-table th{padding:10px 16px;background:#f8fafc;font-size:11px;font-weight:700;color:var(--sub);text-align:left;border-bottom:1px solid var(--border)}
+.quot-table th:last-child,.quot-table td:last-child{text-align:right}
+.quot-table td{padding:12px 16px;font-size:13px;color:var(--text);border-bottom:1px solid var(--bg)}
+.quot-table tr:last-child td{border-bottom:none}
+.item-name{font-weight:600}
+.item-unit{font-size:11px;color:var(--sub)}
+.subtotal{color:var(--sub)}
+.quot-summary{padding:16px 20px;background:#f8fafc;border-top:2px solid var(--border)}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:6px}
+.sum-row.total{font-size:16px;font-weight:800;color:var(--text);margin-top:10px;padding-top:10px;border-top:1.5px solid var(--border)}
+.sum-row.total span:last-child{color:var(--pink)}
+.quot-note{padding:16px 20px;font-size:12px;color:var(--sub);line-height:1.7;border-top:1px dashed var(--border)}
+.action-btns{display:flex;gap:10px;margin:16px}
+.btn{flex:1;padding:14px;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-pink{background:linear-gradient(135deg,var(--pink),#c0396e);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--border);color:var(--text)}
+.form-group{margin:0 16px 12px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:.2s;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card-section{background:#fff;border-radius:16px;margin:0 16px 12px;padding:16px;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+.card-section-title{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:12px}
+.success-screen{text-align:center;padding:40px 20px}
+.success-icon{font-size:72px;margin-bottom:16px;animation:pop .4s}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:24px}
+.quot-ref{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:20px;letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>ใบเสนอราคากลุ่ม</p></div>
+
+<div id="app">
+  <div class="quotation">
+    <div class="quot-header">
+      <div class="quot-logo">🦀</div>
+      <div class="quot-biz">ครัวชมพู่ อ่างศิลา</div>
+      <div class="quot-addr">อ่างศิลา ชลบุรี | โทร 038-XXX-XXXX | LINE OA: @kruachompoo</div>
+    </div>
+    <div class="quot-meta">
+      <div class="meta-row">เลขที่ใบเสนอราคา<br><strong id="quot-no">QT-XXXXXX</strong></div>
+      <div class="meta-row">วันที่<br><strong id="quot-date">—</strong></div>
+      <div class="meta-row">ลูกค้า<br><strong id="quot-customer">—</strong></div>
+      <div class="meta-row">อายุใบเสนอ<br><strong>7 วัน</strong></div>
+    </div>
+    <table class="quot-table">
+      <thead>
+        <tr><th>รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>รวม</th></tr>
+      </thead>
+      <tbody id="quot-tbody"></tbody>
+    </table>
+    <div class="quot-summary">
+      <div class="sum-row"><span>ยอดรวม</span><span id="sum-sub">—</span></div>
+      <div class="sum-row"><span>VAT 7%</span><span id="sum-vat">—</span></div>
+      <div class="sum-row total"><span>รวมทั้งสิ้น</span><span id="sum-total">—</span></div>
+    </div>
+    <div class="quot-note">
+      📌 หมายเหตุ: ราคานี้เป็นราคาเบื้องต้น อาจมีการเปลี่ยนแปลงตามวัตถุดิบ<br>
+      ✅ กรุณาจองล่วงหน้าอย่างน้อย 3 วัน สำหรับกลุ่มมากกว่า 20 ท่าน<br>
+      📞 ยืนยันและปรับแก้ได้ผ่าน LINE OA หรือโทรโดยตรง
+    </div>
+  </div>
+
+  <div class="card-section">
+    <div class="card-section-title">📋 ข้อมูลการจอง</div>
+    <div class="form-group"><label>ชื่อผู้ติดต่อ *</label><input type="text" id="name" placeholder="ชื่อ-นามสกุล"></div>
+    <div class="form-group"><label>เบอร์โทรศัพท์ *</label><input type="tel" id="phone" placeholder="08x-xxx-xxxx"></div>
+    <div class="row2">
+      <div class="form-group"><label>วันที่จัดเลี้ยง *</label><input type="date" id="date"></div>
+      <div class="form-group"><label>จำนวนแขก *</label><select id="guests">
+        <option value="">เลือก</option>
+        <option value="5">5 ท่าน</option><option value="8">8 ท่าน</option>
+        <option value="10">10 ท่าน</option><option value="15">15 ท่าน</option>
+        <option value="20">20 ท่าน</option><option value="25">25 ท่าน</option>
+        <option value="30">30+ ท่าน</option>
+      </select></div>
+    </div>
+    <div class="form-group"><label>หมายเหตุ</label><textarea id="note" rows="2" placeholder="ความต้องการพิเศษ / อาหารแพ้ / ห้องส่วนตัว..."></textarea></div>
+  </div>
+
+  <div class="action-btns">
+    <button class="btn btn-outline" onclick="history.back()">← แก้ไขเมนู</button>
+    <button class="btn btn-pink" id="submit-btn" onclick="submitQuotation()">📤 ส่งใบเสนอราคา</button>
+  </div>
+</div>
+
+<script>
+const LIFF_ID = '2010373258-QUOTATION01';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+let profile = {}, items = [];
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+  } catch(e) {}
+  const params = new URLSearchParams(location.search);
+  const raw = params.get('items');
+  if (raw) { try { items = JSON.parse(decodeURIComponent(raw)); } catch(e) {} }
+  
+  const now = new Date();
+  const quotNo = 'QT-' + now.toISOString().replace(/\D/g,'').slice(2,10);
+  document.getElementById('quot-no').textContent = quotNo;
+  document.getElementById('quot-date').textContent = now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('quot-customer').textContent = profile.displayName || '—';
+  
+  const tbody = document.getElementById('quot-tbody');
+  let sub = 0;
+  tbody.innerHTML = items.map(item => {
+    const amt = item.price * item.qty;
+    sub += amt;
+    return `<tr>
+      <td><div class="item-name">${item.name}</div><div class="item-unit">/${item.unit}</div></td>
+      <td>${item.qty}</td>
+      <td>${item.price.toLocaleString()}</td>
+      <td class="subtotal">${amt.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+  
+  const vat = Math.round(sub * 0.07);
+  const total = sub + vat;
+  document.getElementById('sum-sub').textContent = sub.toLocaleString() + ' ฿';
+  document.getElementById('sum-vat').textContent = vat.toLocaleString() + ' ฿';
+  document.getElementById('sum-total').textContent = total.toLocaleString() + ' ฿';
+  
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('date').min = d.toISOString().split('T')[0];
+}
+
+async function submitQuotation() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const date = document.getElementById('date').value;
+  const guests = document.getElementById('guests').value;
+  if (!name||!phone||!date||!guests) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+  
+  const sub = items.reduce((s,i) => s+i.price*i.qty, 0);
+  const res = await fetch(GAS_URL, {
+    method:'POST', body: JSON.stringify({
+      type:'quotation_submit',
+      lineUserId: profile.userId||'anonymous',
+      displayName: profile.displayName||name,
+      name, phone, eventDate:date, guests:parseInt(guests),
+      note: document.getElementById('note').value.trim(),
+      items, subtotal:sub, vat:Math.round(sub*0.07), total:sub+Math.round(sub*0.07)
+    })
+  }).then(r=>r.json()).catch(()=>({}));
+  
+  const ref = res?.quotationRef || 'QT-'+Date.now().toString().slice(-6);
+  document.getElementById('app').innerHTML = `
+    <div class="success-screen">
+      <div class="success-icon">📋</div>
+      <div class="success-title">ส่งใบเสนอราคาแล้ว!</div>
+      <div class="success-sub">ทีมงานจะติดต่อกลับผ่าน LINE ภายใน 30 นาที<br>เพื่อยืนยันและแจ้งรายละเอียดเพิ่มเติม</div>
+      <div class="quot-ref">เลขอ้างอิง: ${ref}</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">${name} | ${guests} ท่าน<br>วันที่ ${new Date(date).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div>
+      <button class="btn btn-blue" style="width:100%" onclick="liff.closeWindow()">กลับหน้าหลัก</button>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
