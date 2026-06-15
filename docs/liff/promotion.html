@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>โปรโมชั่น — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+/* Filter tabs */
+.filter-bar{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-tab{padding:7px 16px;border-radius:100px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--sub);background:#fff;white-space:nowrap;flex-shrink:0;transition:.15s}
+.filter-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+/* Promo cards */
+.promos{padding:0 16px;display:flex;flex-direction:column;gap:14px}
+.promo-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.promo-banner{height:130px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative}
+.promo-badge{position:absolute;top:10px;right:10px;background:#e6538d;color:#fff;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700}
+.promo-badge.ongoing{background:var(--green)}
+.promo-badge.ending{background:var(--gold)}
+.promo-body{padding:16px}
+.promo-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}
+.promo-desc{font-size:12px;color:var(--sub);margin-bottom:12px;line-height:1.5}
+.promo-footer{display:flex;justify-content:space-between;align-items:center}
+.promo-date{font-size:11px;color:var(--sub)}
+.promo-date span{color:var(--pink);font-weight:600}
+.claim-btn{padding:9px 20px;background:linear-gradient(135deg,var(--pink),#c0396e);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
+.claim-btn:active{transform:scale(.96)}
+.claim-btn.claimed{background:#e5e7eb;color:var(--sub);cursor:default}
+/* Coupon modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;text-align:center;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.coupon-code{background:var(--bg);border:2.5px dashed var(--pink);border-radius:14px;padding:16px;margin:16px 0;font-size:28px;font-weight:800;letter-spacing:4px;color:var(--pink)}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;transition:.15s}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--border);color:var(--sub)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:100px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:.3s;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>โปรโมชั่นและส่วนลด</p></div>
+
+<div class="filter-bar">
+  <button class="filter-tab active" onclick="filterPromo(this,'all')">🎉 ทั้งหมด</button>
+  <button class="filter-tab" onclick="filterPromo(this,'discount')">💸 ส่วนลด</button>
+  <button class="filter-tab" onclick="filterPromo(this,'set')">🍽️ เซ็ตอาหาร</button>
+  <button class="filter-tab" onclick="filterPromo(this,'member')">👑 สมาชิก</button>
+  <button class="filter-tab" onclick="filterPromo(this,'seasonal')">🌸 ตามเทศกาล</button>
+</div>
+
+<div class="promos" id="promos"></div>
+<div class="toast" id="toast"></div>
+
+<!-- Coupon Modal -->
+<div class="modal-overlay" id="coupon-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div style="font-size:52px;margin-bottom:8px">🎟️</div>
+    <h3 style="font-size:17px;font-weight:800;margin-bottom:4px" id="coupon-title"></h3>
+    <p style="font-size:12px;color:var(--sub);margin-bottom:0" id="coupon-desc"></p>
+    <div class="coupon-code" id="coupon-code"></div>
+    <p style="font-size:11px;color:var(--sub);margin-bottom:16px">แสดงโค้ดนี้กับพนักงานที่ร้าน</p>
+    <button class="btn btn-blue" onclick="copyCode()">📋 คัดลอกโค้ด</button>
+    <button class="btn btn-outline" onclick="hideModal()">ปิด</button>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+const LIFF_ID = '2010373258-PROMO01'; // ← เปลี่ยน LIFF ID จริง
+let profile = {}, claimed = new Set(JSON.parse(localStorage.getItem('claimed')||'[]'));
+
+const PROMOS = [
+  {
+    id:'P001', type:'discount', category:'all',
+    emoji:'🎉', color:'linear-gradient(135deg,#4dc8f4,#e6538d)',
+    title:'สมัครสมาชิก รับ 50 แต้มฟรี',
+    desc:'สมัครสมาชิก LINE OA วันนี้ รับ 50 แต้มทันที พร้อมสิทธิพิเศษสมาชิก',
+    badge:'ตลอดปี', badgeClass:'ongoing',
+    validUntil:'31 ธ.ค. 2567',
+    code:'MEMBER50', hasCoupon:false
+  },
+  {
+    id:'P002', type:'set', category:'set',
+    emoji:'🦞', color:'linear-gradient(135deg,#f59e0b,#ef4444)',
+    title:'เซ็ตกุ้งแม่น้ำ 2 ท่าน ลด 15%',
+    desc:'สั่งเซ็ตกุ้งแม่น้ำ 2 ท่านขึ้นไป ลด 15% ทุกวันจันทร์–ศุกร์',
+    badge:'จ–ศ เท่านั้น', badgeClass:'ending',
+    validUntil:'30 มิ.ย. 2567',
+    code:'GOONG15', hasCoupon:true
+  },
+  {
+    id:'P003', type:'member', category:'member',
+    emoji:'👑', color:'linear-gradient(135deg,#f59e0b,#d97706)',
+    title:'Gold Member ลด 20% ทุกวัน',
+    desc:'สมาชิก Gold ลดราคา 20% สำหรับทุกออเดอร์ ไม่มีขั้นต่ำ',
+    badge:'Gold เท่านั้น', badgeClass:'ongoing',
+    validUntil:'ตลอดปี 2567',
+    code:'GOLD20', hasCoupon:true
+  },
+  {
+    id:'P004', type:'discount', category:'discount',
+    emoji:'🎂', color:'linear-gradient(135deg,#e6538d,#9333ea)',
+    title:'โปรวันเกิด ลดสูงสุด 30%',
+    desc:'วันเกิดนี้ รับส่วนลด 30% สำหรับทุกออเดอร์ ใช้ได้ในเดือนเกิดของคุณ',
+    badge:'เดือนเกิด', badgeClass:'ongoing',
+    validUntil:'ตลอดปี 2567',
+    code:'BDAY30', hasCoupon:true
+  },
+  {
+    id:'P005', type:'seasonal', category:'seasonal',
+    emoji:'🌸', color:'linear-gradient(135deg,#22c55e,#16a34a)',
+    title:'เที่ยงนี้ถูกกว่า! ลด 10% มื้อกลางวัน',
+    desc:'สั่งอาหารระหว่าง 11:00–14:00 ลด 10% ทุกเมนู (ยกเว้นเครื่องดื่ม)',
+    badge:'11:00–14:00', badgeClass:'ending',
+    validUntil:'15 มิ.ย. 2567',
+    code:'LUNCH10', hasCoupon:true
+  },
+  {
+    id:'P006', type:'member', category:'member',
+    emoji:'🤝', color:'linear-gradient(135deg,#4dc8f4,#0ea5e9)',
+    title:'แนะนำเพื่อน รับ 30 แต้ม',
+    desc:'แนะนำเพื่อนสมัครสมาชิก LINE OA รับ 30 แต้ม เพื่อนรับ 20 แต้ม',
+    badge:'Referral', badgeClass:'ongoing',
+    validUntil:'ตลอดปี 2567',
+    code:'REFER30', hasCoupon:false
+  },
+];
+
+let currentFilter = 'all', currentCoupon = null;
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    // log promo view
+    post({ type:'promo_view', lineUserId:profile.userId, displayName:profile.displayName });
+  } catch(e) { /* silent */ }
+  renderPromos();
+}
+
+function filterPromo(el, type) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = type;
+  renderPromos();
+}
+
+function renderPromos() {
+  const list = currentFilter === 'all' ? PROMOS : PROMOS.filter(p => p.type === currentFilter || p.category === currentFilter);
+  document.getElementById('promos').innerHTML = list.map(p => {
+    const isClaimed = claimed.has(p.id);
+    return `<div class="promo-card" data-id="${p.id}" data-type="${p.type}">
+      <div class="promo-banner" style="background:${p.color}">
+        ${p.emoji}
+        <span class="promo-badge ${p.badgeClass}">${p.badge}</span>
+      </div>
+      <div class="promo-body">
+        <div class="promo-title">${p.title}</div>
+        <div class="promo-desc">${p.desc}</div>
+        <div class="promo-footer">
+          <div class="promo-date">ถึง <span>${p.validUntil}</span></div>
+          ${p.hasCoupon
+            ? `<button class="claim-btn ${isClaimed?'claimed':''}" onclick="claimCoupon('${p.id}')">${isClaimed?'✅ ใช้แล้ว':'รับโค้ด'}</button>`
+            : `<span style="font-size:11px;color:var(--green);font-weight:600">🟢 ใช้ได้อัตโนมัติ</span>`
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:40px;color:var(--sub)">ไม่มีโปรโมชั่นในหมวดนี้</div>';
+}
+
+function claimCoupon(promoId) {
+  const promo = PROMOS.find(p => p.id === promoId);
+  if (!promo || !promo.hasCoupon) return;
+  currentCoupon = promo;
+  document.getElementById('coupon-title').textContent = promo.title;
+  document.getElementById('coupon-desc').textContent = promo.desc;
+  document.getElementById('coupon-code').textContent = promo.code;
+  document.getElementById('coupon-modal').classList.add('active');
+  // mark claimed
+  claimed.add(promoId);
+  localStorage.setItem('claimed', JSON.stringify([...claimed]));
+  // log to GAS
+  if (profile.userId) post({ type:'coupon_claim', lineUserId:profile.userId, displayName:profile.displayName, promoId, code:promo.code });
+}
+
+function copyCode() {
+  if (!currentCoupon) return;
+  navigator.clipboard.writeText(currentCoupon.code).then(() => showToast('📋 คัดลอกโค้ดแล้ว!')).catch(() => showToast('โค้ด: '+currentCoupon.code));
+}
+
+function hideModal() {
+  document.getElementById('coupon-modal').classList.remove('active');
+  renderPromos();
+}
+
+function closeModal(e) { if (e.target === e.currentTarget) hideModal(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function post(data) {
+  return fetch(GAS_URL, { method:'POST', body: JSON.stringify(data) }).then(r=>r.json()).catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>
