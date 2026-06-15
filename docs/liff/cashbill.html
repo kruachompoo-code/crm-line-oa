@@ -1,1 +1,246 @@
-test
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เช็คบิล — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.bill-card{background:#fff;margin:16px;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.bill-header{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);padding:24px 20px;color:#fff;text-align:center}
+.bill-logo{font-size:32px;margin-bottom:6px}
+.bill-biz{font-size:16px;font-weight:800;margin-bottom:2px}
+.bill-addr{font-size:11px;opacity:.75;line-height:1.5}
+.bill-meta{padding:16px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meta-item{font-size:12px;color:var(--sub)}
+.meta-item strong{color:var(--text);font-size:13px;display:block;margin-top:2px}
+.bill-table{width:100%;border-collapse:collapse}
+.bill-table th{padding:10px 16px;background:#f8fafc;font-size:11px;font-weight:700;color:var(--sub);text-align:left;border-bottom:1px solid var(--border)}
+.bill-table th:last-child,.bill-table td:last-child{text-align:right}
+.bill-table td{padding:12px 16px;font-size:13px;color:var(--text);border-bottom:1px solid #f5f8ff}
+.bill-table tr:last-child td{border-bottom:none}
+.item-name{font-weight:600}
+.item-unit{font-size:11px;color:var(--sub)}
+.bill-summary{padding:16px 20px;background:#f8fafc;border-top:2px solid var(--border)}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:6px}
+.sum-row.total{font-size:16px;font-weight:800;color:var(--text);margin-top:10px;padding-top:10px;border-top:1.5px solid var(--border)}
+.sum-row.total span:last-child{color:var(--pink)}
+.bill-note{padding:14px 20px;font-size:11px;color:var(--sub);border-top:1px dashed var(--border);line-height:1.8}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 16px}
+.pay-btn{padding:14px;border:2px solid var(--border);border-radius:14px;background:#fff;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
+.pay-btn.sel{border-color:var(--pink);background:rgba(230,83,141,.06);color:var(--pink)}
+.pay-btn:active{transform:scale(.97)}
+.pay-icon{font-size:24px;display:block;margin-bottom:4px}
+.form-group{margin:0 16px 12px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:.2s;background:#fff}
+.form-group input:focus{border-color:var(--blue)}
+.section-title{padding:14px 16px 8px;font-size:13px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.btn-wrap{padding:0 16px 20px}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff}
+.btn:active{transform:scale(.97)}
+.loading-screen,.success-screen,.error-screen{text-align:center;padding:40px 20px}
+.load-icon{font-size:52px;margin-bottom:16px;animation:spin 1.5s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.s-icon{font-size:72px;margin-bottom:16px;animation:pop .4s}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.s-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
+.s-sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:20px}
+.bill-ref{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🧾 เช็คบิล / ชำระเงิน</h1><p>ตรวจสอบบิลและเลือกวิธีชำระเงิน</p></div>
+
+<div id="app">
+  <div id="loading" class="loading-screen">
+    <div class="load-icon">🔄</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text)">กำลังดึงข้อมูลโต๊ะ...</div>
+    <div style="font-size:13px;color:var(--sub);margin-top:8px">กรุณารอสักครู่</div>
+  </div>
+
+  <div id="bill-content" style="display:none">
+    <div class="bill-card">
+      <div class="bill-header">
+        <div class="bill-logo">🦀</div>
+        <div class="bill-biz">ครัวชมพู่ อ่างศิลา</div>
+        <div class="bill-addr">อ่างศิลา จ.ชลบุรี | โทร 038-XXX-XXXX | LINE OA: @kruachompoo</div>
+      </div>
+      <div class="bill-meta">
+        <div class="meta-item">หมายเลขบิล<strong id="bill-no">—</strong></div>
+        <div class="meta-item">วันที่<strong id="bill-date">—</strong></div>
+        <div class="meta-item">โต๊ะ<strong id="table-no">—</strong></div>
+        <div class="meta-item">จำนวนผู้ใช้<strong id="guest-count">—</strong></div>
+      </div>
+      <table class="bill-table">
+        <thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>รวม</th></tr></thead>
+        <tbody id="bill-tbody"></tbody>
+      </table>
+      <div class="bill-summary">
+        <div class="sum-row"><span>ยอดรวม</span><span id="sum-sub">—</span></div>
+        <div class="sum-row"><span>VAT 7%</span><span id="sum-vat">—</span></div>
+        <div class="sum-row total"><span>ยอดสุทธิ</span><span id="sum-total">—</span></div>
+      </div>
+      <div class="bill-note">
+        📌 ราคานี้รวม VAT 7% แล้ว<br>
+        ✅ ขอบคุณที่ใช้บริการครัวชมพู่ อ่างศิลา
+      </div>
+    </div>
+
+    <div class="section-title">💳 เลือกวิธีชำระเงิน</div>
+    <div class="pay-methods">
+      <div class="pay-btn" id="pay-cash" onclick="selectPay('cash')"><span class="pay-icon">💵</span>เงินสด</div>
+      <div class="pay-btn" id="pay-qr" onclick="selectPay('qr')"><span class="pay-icon">📱</span>QR Promptpay</div>
+      <div class="pay-btn" id="pay-transfer" onclick="selectPay('transfer')"><span class="pay-icon">🏦</span>โอนเงิน</div>
+      <div class="pay-btn" id="pay-card" onclick="selectPay('card')"><span class="pay-icon">💳</span>บัตรเครดิต</div>
+    </div>
+
+    <div class="form-group">
+      <label>ใบเสร็จส่ง E-mail (ไม่บังคับ)</label>
+      <input type="email" id="email" placeholder="email@example.com">
+    </div>
+
+    <div class="btn-wrap">
+      <button class="btn" id="pay-btn" onclick="confirmPayment()">🧾 ยืนยันชำระเงิน</button>
+    </div>
+  </div>
+
+  <div id="no-bill" style="display:none;text-align:center;padding:40px 20px">
+    <div style="font-size:52px;margin-bottom:16px">😕</div>
+    <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">ไม่พบข้อมูลบิล</div>
+    <div style="font-size:14px;color:var(--sub)">กรุณาแจ้งพนักงาน หรือ<br>สแกน QR ที่โต๊ะใหม่อีกครั้ง</div>
+  </div>
+</div>
+
+<script>
+const LIFF_ID = '2010373258-CASHBILL01';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+let profile = {}, billData = null, payMethod = '';
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+  } catch(e) {}
+  
+  const params = new URLSearchParams(location.search);
+  const tableId = params.get('table') || params.get('t');
+  const billId = params.get('bill') || params.get('b');
+  
+  // Fetch bill data from GAS
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'get_bill',
+        tableId: tableId || 'T01',
+        billId: billId || '',
+        lineUserId: profile.userId || 'anonymous'
+      })
+    }).then(r => r.json());
+    
+    if (res && res.items && res.items.length > 0) {
+      billData = res;
+      renderBill(res);
+    } else {
+      // Demo bill if no data
+      renderBill(getDemoBill(tableId));
+    }
+  } catch(e) {
+    renderBill(getDemoBill(tableId));
+  }
+}
+
+function getDemoBill(tableId) {
+  return {
+    billNo: 'B-' + Date.now().toString().slice(-6),
+    tableNo: tableId || 'T01',
+    date: new Date().toLocaleDateString('th-TH', {year:'numeric',month:'long',day:'numeric'}),
+    guests: 4,
+    items: [
+      {name:'กุ้งแม่น้ำย่าง',unit:'ตัว',qty:2,price:280},
+      {name:'ปูทะเลต้มน้ำเค็ม',unit:'ตัว',qty:1,price:350},
+      {name:'ปลาหมึกผัดเผ็ด',unit:'จาน',qty:1,price:220},
+    ]
+  };
+}
+
+function renderBill(data) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('bill-content').style.display = 'block';
+  
+  document.getElementById('bill-no').textContent = data.billNo;
+  document.getElementById('bill-date').textContent = data.date;
+  document.getElementById('table-no').textContent = data.tableNo;
+  document.getElementById('guest-count').textContent = (data.guests || '-') + ' คน';
+  
+  let sub = 0;
+  document.getElementById('bill-tbody').innerHTML = data.items.map(item => {
+    const amt = item.price * item.qty;
+    sub += amt;
+    return `<tr>
+      <td><div class="item-name">${item.name}</div><div class="item-unit">/ ${item.unit}</div></td>
+      <td>${item.qty}</td>
+      <td>${item.price.toLocaleString()}</td>
+      <td>${amt.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+  
+  const vat = Math.round(sub * 0.07);
+  const total = sub + vat;
+  document.getElementById('sum-sub').textContent = sub.toLocaleString() + ' ฿';
+  document.getElementById('sum-vat').textContent = vat.toLocaleString() + ' ฿';
+  document.getElementById('sum-total').textContent = total.toLocaleString() + ' ฿';
+  billData = { ...data, subtotal: sub, vat, total };
+}
+
+function selectPay(method) {
+  payMethod = method;
+  ['cash','qr','transfer','card'].forEach(m => {
+    document.getElementById('pay-'+m).classList.toggle('sel', m === method);
+  });
+}
+
+async function confirmPayment() {
+  if (!payMethod) { alert('กรุณาเลือกวิธีชำระเงิน'); return; }
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true; btn.textContent = 'กำลังดำเนินการ...';
+  
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'bill_payment',
+      lineUserId: profile.userId || 'anonymous',
+      displayName: profile.displayName || '',
+      billNo: billData.billNo,
+      tableNo: billData.tableNo,
+      payMethod,
+      subtotal: billData.subtotal,
+      vat: billData.vat,
+      total: billData.total,
+      email: document.getElementById('email').value.trim()
+    })
+  }).then(r => r.json()).catch(() => ({}));
+  
+  const ref = res?.payRef || billData.billNo;
+  document.getElementById('app').innerHTML = `
+    <div class="success-screen">
+      <div class="s-icon">✅</div>
+      <div class="s-title">ชำระเงินเรียบร้อย!</div>
+      <div class="s-sub">ขอบคุณที่ใช้บริการครัวชมพู่ อ่างศิลา<br>หวังว่าจะได้พบกันอีกครั้ง 😊</div>
+      <div class="bill-ref">ใบเสร็จ: ${ref}</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">ยอดชำระ ${billData.total.toLocaleString()} ฿<br>วิธีชำระ: ${{cash:'เงินสด',qr:'QR Promptpay',transfer:'โอนเงิน',card:'บัตรเครดิต'}[payMethod]}</div>
+      <button class="btn" onclick="liff.closeWindow()">กลับหน้าหลัก</button>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
