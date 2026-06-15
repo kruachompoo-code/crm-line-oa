@@ -2,180 +2,266 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drive-Thru — ครัวชมพู่ อ่างศิลา</title>
+<title>Drive-Thru / สั่งรับกลับบ้าน — ครัวชมพู่ อ่างศิลา</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#10b981}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
 .topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
 .topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
 .hero{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;margin:16px;border-radius:20px;padding:24px 20px;text-align:center}
-.hero-emoji{font-size:52px;margin-bottom:8px}
-.hero-title{font-size:18px;font-weight:800;margin-bottom:4px}
-.hero-sub{font-size:12px;opacity:.8;line-height:1.6}
-.steps{display:flex;gap:0;margin:0 16px 16px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-.step{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--border)}
-.step:last-child{border-right:none}
-.step-num{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin:0 auto 6px}
-.step-txt{font-size:11px;color:var(--sub);font-weight:600;line-height:1.3}
+.hero-icon{font-size:48px;margin-bottom:8px}
+.hero-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.hero-sub{font-size:13px;opacity:.8;line-height:1.5}
+.steps{display:flex;justify-content:space-between;margin:0 16px 16px;gap:8px}
+.step{background:#fff;border-radius:14px;padding:12px 8px;flex:1;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.step-num{font-size:20px;margin-bottom:4px}
+.step-text{font-size:10px;font-weight:700;color:var(--sub);line-height:1.3}
 .card{background:#fff;border-radius:16px;margin:0 16px 12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
 .card-title{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
-.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.menu-item{border:1.5px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:.15s;position:relative;text-align:center}
-.menu-item.sel{border-color:var(--pink);background:rgba(230,83,141,.06)}
-.menu-item .check{position:absolute;top:5px;right:5px;background:var(--pink);color:#fff;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:10px}
-.menu-item.sel .check{display:flex}
-.menu-item .mi-emoji{font-size:26px;margin-bottom:4px}
-.menu-item .mi-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:2px}
-.menu-item .mi-price{font-size:12px;color:var(--pink);font-weight:800}
-.qty-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.qty-label{flex:1;font-size:12px;color:var(--text);font-weight:600}
-.qty-ctrl{display:flex;align-items:center;gap:8px}
-.qbtn{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
-.qm{background:#fee2e2;color:#dc2626}.qp{background:var(--pink);color:#fff}
-.qn{font-size:13px;font-weight:800;min-width:18px;text-align:center}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:.2s;background:#fff}
 .form-group input:focus,.form-group select:focus{border-color:var(--blue)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.total-bar{background:linear-gradient(135deg,rgba(77,200,244,.08),rgba(230,83,141,.06));border:1px solid rgba(77,200,244,.25);border-radius:12px;padding:14px 16px;margin:0 16px 16px;display:flex;justify-content:space-between;align-items:center}
-.total-label{font-size:13px;color:var(--sub)}
-.total-amt{font-size:18px;font-weight:800;color:var(--pink)}
+.menu-item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1.5px solid transparent;transition:.15s}
+.menu-item.selected{border-color:var(--pink);background:linear-gradient(135deg,rgba(230,83,141,.06),rgba(77,200,244,.04))}
+.mi-info{flex:1}
+.mi-name{font-size:14px;font-weight:700;color:var(--text)}
+.mi-price{font-size:13px;color:var(--pink);font-weight:700;margin-top:2px}
+.mi-desc{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.4}
+.qty-ctrl{display:flex;align-items:center;gap:8px}
+.qty-btn{width:32px;height:32px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--pink),var(--blue));color:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.qty-btn.minus{background:#f3f4f6;color:var(--text)}
+.qty-num{font-size:16px;font-weight:800;color:var(--text);min-width:20px;text-align:center}
+.time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.time-slot{padding:10px 6px;border:1.5px solid var(--border);border-radius:12px;font-size:12px;font-weight:700;text-align:center;cursor:pointer;transition:.15s;color:var(--text);background:#fff}
+.time-slot.sel{border-color:var(--pink);background:linear-gradient(135deg,rgba(230,83,141,.1),rgba(77,200,244,.08));color:var(--pink)}
+.summary-bar{background:#fff;border-radius:16px;margin:0 16px 12px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;justify-content:space-between;align-items:center}
+.sum-label{font-size:13px;color:var(--sub)}
+.sum-total{font-size:22px;font-weight:800;color:var(--text)}
+.sum-items{font-size:12px;color:var(--sub);margin-top:2px}
 .btn-wrap{padding:0 16px 20px}
-.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;background:linear-gradient(135deg,var(--pink),var(--blue));color:#fff;margin-bottom:10px}
 .btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:default}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 20px;border-radius:50px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:.3s;white-space:nowrap}
+.toast.show{opacity:1}
 .success-screen{text-align:center;padding:40px 20px}
 .s-icon{font-size:72px;margin-bottom:16px;animation:pop .4s}
 @keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
 .s-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
 .s-sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:20px}
-.order-ref{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:2px}
-.wait-badge{background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:20px}
+.order-ref{background:linear-gradient(135deg,var(--pink),var(--blue));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:2px}
+.info-box{background:linear-gradient(135deg,rgba(77,200,244,.08),rgba(230,83,141,.08));border:1.5px solid rgba(77,200,244,.3);border-radius:14px;padding:14px 16px;margin:0 16px 12px;font-size:13px;color:var(--text);line-height:1.7}
+.info-box strong{color:var(--pink)}
 </style>
 </head>
 <body>
-<div class="topbar"><h1>🚗 Drive-Thru สั่งรับหน้าร้าน</h1><p>สั่งออนไลน์ — รับสดที่ร้าน ไม่ต้องรอนาน</p></div>
+<div class="topbar"><h1>🚗 Drive-Thru รับกลับบ้าน</h1><p>สั่งก่อน ถึงแล้วรับได้เลย ไม่ต้องรอนาน</p></div>
 
-<div id="app">
+<div id="loading" style="text-align:center;padding:60px 20px">
+  <div style="font-size:52px;margin-bottom:16px">🚗</div>
+  <div style="font-size:16px;font-weight:700;color:var(--text)">กำลังโหลด...</div>
+</div>
+
+<div id="app" style="display:none">
   <div class="hero">
-    <div class="hero-emoji">🚗</div>
-    <div class="hero-title">สั่งล่วงหน้า รับสะดวก</div>
-    <div class="hero-sub">เลือกเมนู → ระบุเวลารับ → แวะรับที่หน้าร้าน<br>ไม่ต้องจอดรถนาน ทางร้านเตรียมพร้อมไว้รอ</div>
+    <div class="hero-icon">🚗</div>
+    <div class="hero-title">Drive-Thru ครัวชมพู่</div>
+    <div class="hero-sub">สั่งผ่าน LINE • มาถึงรับได้เลย • ไม่ต้องจอดรอนาน</div>
   </div>
 
   <div class="steps">
-    <div class="step"><div class="step-num">1</div><div class="step-txt">เลือก<br>เมนู</div></div>
-    <div class="step"><div class="step-num">2</div><div class="step-txt">ระบุ<br>เวลา</div></div>
-    <div class="step"><div class="step-num">3</div><div class="step-txt">ยืนยัน<br>ออเดอร์</div></div>
-    <div class="step"><div class="step-num">4</div><div class="step-txt">แวะ<br>รับสด</div></div>
+    <div class="step"><div class="step-num">📱</div><div class="step-text">สั่งผ่าน LINE ล่วงหน้า</div></div>
+    <div class="step"><div class="step-num">🍽️</div><div class="step-text">ครัวเตรียมพร้อม</div></div>
+    <div class="step"><div class="step-num">🚗</div><div class="step-text">ขับมาถึงรับได้เลย</div></div>
   </div>
 
+  <div class="info-box">
+    📍 จุดรับอาหาร Drive-Thru: <strong>ประตูทางเข้าหลัก ครัวชมพู่ อ่างศิลา</strong><br>
+    ⏰ เปิดบริการ Drive-Thru: <strong>10:00 – 20:00 น.</strong><br>
+    📞 สอบถาม: <strong>038-XXX-XXXX</strong>
+  </div>
+
+  <!-- ข้อมูลรถ -->
   <div class="card">
-    <div class="card-title">🍽️ เลือกเมนู (เลือกได้หลายรายการ)</div>
-    <div class="menu-grid">
-      <div class="menu-item" id="i-G01" onclick="tog('G01')"><div class="check">✓</div><div class="mi-emoji">🦐</div><div class="mi-name">กุ้งย่างตัวใหญ่</div><div class="mi-price">280฿</div></div>
-      <div class="menu-item" id="i-G03" onclick="tog('G03')"><div class="check">✓</div><div class="mi-emoji">🦐</div><div class="mi-name">กุ้งนึ่งมะนาว</div><div class="mi-price">320฿</div></div>
-      <div class="menu-item" id="i-G04" onclick="tog('G04')"><div class="check">✓</div><div class="mi-emoji">🦀</div><div class="mi-name">ปูทะเลต้ม</div><div class="mi-price">350฿</div></div>
-      <div class="menu-item" id="i-G06" onclick="tog('G06')"><div class="check">✓</div><div class="mi-emoji">🦀</div><div class="mi-name">ปูผัดผงกะหรี่</div><div class="mi-price">320฿</div></div>
-      <div class="menu-item" id="i-G07" onclick="tog('G07')"><div class="check">✓</div><div class="mi-emoji">🦑</div><div class="mi-name">ปลาหมึกผัดเผ็ด</div><div class="mi-price">220฿</div></div>
-      <div class="menu-item" id="i-G13" onclick="tog('G13')"><div class="check">✓</div><div class="mi-emoji">🐚</div><div class="mi-name">หอยแมลงภู่</div><div class="mi-price">180฿</div></div>
+    <div class="card-title">🚗 ข้อมูลรถและเวลารับ</div>
+    <div class="form-group"><label>ทะเบียนรถ *</label>
+      <input type="text" id="car-plate" placeholder="กข 1234 / ABC 5678" style="text-transform:uppercase">
     </div>
-    <div id="qty-area"></div>
+    <div class="form-group"><label>จังหวัดรถ</label>
+      <input type="text" id="car-province" placeholder="ชลบุรี / กรุงเทพฯ">
+    </div>
+    <div class="form-group"><label>เบอร์โทรติดต่อ *</label>
+      <input type="tel" id="car-phone" placeholder="08X-XXX-XXXX">
+    </div>
+    <div class="form-group">
+      <label>เวลาที่จะมาถึง *</label>
+      <div class="time-slots" id="time-slots"></div>
+      <input type="time" id="custom-time" style="margin-top:8px" placeholder="หรือระบุเวลาเอง">
+    </div>
   </div>
 
+  <!-- เมนู -->
   <div class="card">
-    <div class="card-title">⏰ กำหนดเวลารับ</div>
-    <div class="row2">
-      <div class="form-group"><label>วันที่ *</label><input type="date" id="dt"></div>
-      <div class="form-group"><label>เวลา *</label>
-        <select id="tm">
-          <option value="">เลือก</option>
-          <option>10:00</option><option>11:00</option><option>12:00</option>
-          <option>13:00</option><option>14:00</option><option>17:00</option>
-          <option>18:00</option><option>19:00</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group"><label>ชื่อ *</label><input type="text" id="nm" placeholder="ชื่อ-นามสกุล"></div>
-    <div class="form-group"><label>เบอร์โทร *</label><input type="tel" id="ph" placeholder="08x-xxx-xxxx"></div>
-    <div class="form-group"><label>หมายเหตุ</label><textarea id="nt" rows="2" placeholder="แพ้อาหาร / อื่นๆ"></textarea></div>
+    <div class="card-title">🍽️ เลือกเมนู</div>
+    <div id="menu-list"></div>
   </div>
 
-  <div class="total-bar" id="total-bar" style="display:none">
-    <span class="total-label">ยอดรวมประมาณ</span>
-    <span class="total-amt" id="total-amt">0 ฿</span>
+  <!-- หมายเหตุ -->
+  <div class="card">
+    <div class="card-title">📝 หมายเหตุ</div>
+    <div class="form-group">
+      <textarea id="order-note" rows="2" placeholder="ระบุความต้องการพิเศษ / แพ้อาหาร / ใส่กล่องแยก..."></textarea>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div>
+      <div class="sum-label">ยอดรวม</div>
+      <div class="sum-items" id="sum-items">0 รายการ</div>
+    </div>
+    <div class="sum-total" id="sum-total">฿0</div>
   </div>
 
   <div class="btn-wrap">
-    <button class="btn" id="sub-btn" onclick="submit()">🚗 ยืนยัน Drive-Thru</button>
+    <button class="btn" id="order-btn" onclick="submitOrder()">🚗 ยืนยันสั่ง Drive-Thru</button>
   </div>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script>
 const LIFF_ID = '2010373258-DRIVETHRU01';
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
-const MENU = {G01:{n:'กุ้งย่างตัวใหญ่',p:280,u:'ตัว'},G03:{n:'กุ้งนึ่งมะนาว',p:320,u:'จาน'},G04:{n:'ปูทะเลต้ม',p:350,u:'ตัว'},G06:{n:'ปูผัดผงกะหรี่',p:320,u:'จาน'},G07:{n:'ปลาหมึกผัดเผ็ด',p:220,u:'จาน'},G13:{n:'หอยแมลงภู่อบ',p:180,u:'จาน'}};
-let sel={}, profile={};
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQYy_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+let profile = {}, cart = {}, menuItems = [], selectedTime = '';
 
-async function init(){
-  try{ await liff.init({liffId:LIFF_ID}); if(!liff.isLoggedIn()){liff.login();return;} profile=await liff.getProfile(); }catch(e){}
-  const d=new Date(); d.setDate(d.getDate()+1);
-  document.getElementById('dt').min=d.toISOString().split('T')[0];
+const DEFAULT_MENU = [
+  { id:'m1', name:'กุ้งแม่น้ำเผาชมพู่อ่างศิลา', price:280, unit:'ตัว', desc:'กุ้งแม่น้ำสดเผาถ่าน' },
+  { id:'m2', name:'ปูม้านึ่งน้ำปลาหวาน', price:350, unit:'ตัว', desc:'ปูม้าสดนึ่งน้ำปลาหวาน' },
+  { id:'m3', name:'ปลากะพงทอดน้ำปลา', price:280, unit:'จาน', desc:'ปลากะพงทอดกรอบ' },
+  { id:'m4', name:'ต้มยำทะเลรวมมิตร', price:220, unit:'หม้อ', desc:'ต้มยำน้ำข้นรสจัดจ้าน' },
+  { id:'m5', name:'ผัดฉ่าทะเลสด', price:180, unit:'จาน', desc:'' },
+  { id:'m6', name:'ข้าวสวย', price:20, unit:'ถ้วย', desc:'' },
+];
+
+const TIME_SLOTS = ['10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','15:00','16:00','17:00','18:00'];
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+  } catch(e) {}
+
+  // Time slots
+  const now = new Date();
+  const slots = TIME_SLOTS.filter(t => {
+    const [h,m] = t.split(':').map(Number);
+    return h*60+m > now.getHours()*60+now.getMinutes()+30;
+  }).slice(0,6);
+  document.getElementById('time-slots').innerHTML = slots.map(t =>
+    `<div class="time-slot" onclick="selectTime('${t}',this)">${t} น.</div>`
+  ).join('');
+
+  // โหลดเมนู
+  try {
+    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify({ type:'get_menu' }) }).then(r=>r.json());
+    menuItems = res?.items?.length > 0 ? res.items : DEFAULT_MENU;
+  } catch(e) { menuItems = DEFAULT_MENU; }
+
+  renderMenu();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 }
 
-function tog(id){
-  if(sel[id]) delete sel[id]; else sel[id]=1;
-  document.getElementById('i-'+id).classList.toggle('sel',!!sel[id]);
-  renderQty(); updateTotal();
+function selectTime(t, el) {
+  selectedTime = t;
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('custom-time').value = '';
 }
 
-function renderQty(){
-  const ids=Object.keys(sel);
-  document.getElementById('qty-area').innerHTML = ids.length ? `<div style="margin-top:12px">${ids.map(id=>`
-    <div class="qty-row"><span class="qty-label">${MENU[id].n}</span>
-    <div class="qty-ctrl">
-      <button class="qbtn qm" onclick="chg('${id}',-1)">−</button>
-      <span class="qn" id="qn-${id}">${sel[id]}</span>
-      <button class="qbtn qp" onclick="chg('${id}',1)">+</button>
-    </div></div>`).join('')}</div>` : '';
+function renderMenu() {
+  document.getElementById('menu-list').innerHTML = menuItems.map(item => `
+    <div class="menu-item" id="item-${item.id}">
+      <div class="mi-info">
+        <div class="mi-name">${item.name}</div>
+        <div class="mi-price">฿${item.price.toLocaleString()} / ${item.unit}</div>
+        ${item.desc ? `<div class="mi-desc">${item.desc}</div>` : ''}
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn minus" onclick="changeQty('${item.id}',-1)">−</button>
+        <div class="qty-num" id="qty-${item.id}">0</div>
+        <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-function chg(id,d){ if(!sel[id])return; sel[id]=Math.max(1,sel[id]+d); const e=document.getElementById('qn-'+id); if(e)e.textContent=sel[id]; updateTotal(); }
-
-function updateTotal(){
-  const ids=Object.keys(sel);
-  const tot=ids.reduce((s,id)=>s+MENU[id].p*sel[id],0);
-  const bar=document.getElementById('total-bar');
-  bar.style.display=ids.length?'flex':'none';
-  document.getElementById('total-amt').textContent=tot.toLocaleString()+' ฿';
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id]||0)+delta);
+  document.getElementById('qty-'+id).textContent = cart[id];
+  document.getElementById('item-'+id).classList.toggle('selected', cart[id]>0);
+  updateSummary();
 }
 
-async function submit(){
-  const nm=document.getElementById('nm').value.trim();
-  const ph=document.getElementById('ph').value.trim();
-  const dt=document.getElementById('dt').value;
-  const tm=document.getElementById('tm').value;
-  if(!nm||!ph||!dt||!tm){alert('กรุณากรอกข้อมูลให้ครบ');return;}
-  if(!Object.keys(sel).length){alert('กรุณาเลือกเมนู');return;}
-  const btn=document.getElementById('sub-btn');
-  btn.disabled=true; btn.textContent='กำลังส่ง...';
-  const items=Object.keys(sel).map(id=>({id,name:MENU[id].n,price:MENU[id].p,qty:sel[id],unit:MENU[id].u}));
-  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
-  const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({type:'drivethru_order',lineUserId:profile.userId||'anonymous',displayName:profile.displayName||nm,name:nm,phone:ph,pickupDate:dt,pickupTime:tm,note:document.getElementById('nt').value.trim(),items,total})}).then(r=>r.json()).catch(()=>({}));
-  const ref=res?.orderRef||'DT-'+Date.now().toString().slice(-6);
-  document.getElementById('app').innerHTML=`
+function updateSummary() {
+  let total=0, count=0;
+  menuItems.forEach(i => { const q=cart[i.id]||0; total+=q*i.price; count+=q; });
+  document.getElementById('sum-total').textContent = '฿'+total.toLocaleString();
+  document.getElementById('sum-items').textContent = count+' รายการ';
+}
+
+async function submitOrder() {
+  const plate = document.getElementById('car-plate').value.trim();
+  const phone = document.getElementById('car-phone').value.trim();
+  const time = selectedTime || document.getElementById('custom-time').value;
+  if (!plate) { alert('กรุณาระบุทะเบียนรถ'); return; }
+  if (!phone) { alert('กรุณาระบุเบอร์โทรศัพท์'); return; }
+  if (!time) { alert('กรุณาเลือกเวลาที่จะมาถึง'); return; }
+  const items = menuItems.filter(i=>(cart[i.id]||0)>0).map(i=>({ name:i.name, qty:cart[i.id], price:i.price, unit:i.unit }));
+  if (!items.length) { alert('กรุณาเลือกเมนูอย่างน้อย 1 รายการ'); return; }
+
+  const btn = document.getElementById('order-btn');
+  btn.disabled = true; btn.textContent = 'กำลังส่งคำสั่ง...';
+
+  const total = items.reduce((s,i) => s+i.qty*i.price, 0);
+  const res = await fetch(GAS_URL, {
+    method:'POST',
+    body: JSON.stringify({
+      type:'submit_drivethru',
+      lineUserId: profile.userId||'anonymous',
+      displayName: profile.displayName||'',
+      carPlate: plate.toUpperCase(),
+      carProvince: document.getElementById('car-province').value.trim(),
+      phone, arrivalTime: time, items, total,
+      note: document.getElementById('order-note').value.trim()
+    })
+  }).then(r=>r.json()).catch(()=>({}));
+
+  const ref = res?.orderRef || 'DT-'+Date.now().toString().slice(-6);
+  document.getElementById('app').innerHTML = `
     <div class="success-screen">
-      <div class="s-icon">🚗</div>
+      <div class="s-icon">🚗💨</div>
       <div class="s-title">รับออเดอร์แล้ว!</div>
-      <div class="s-sub">ทางร้านจะเตรียมสินค้าพร้อมก่อนเวลารับ<br>แวะรับที่หน้าร้านได้เลย ไม่ต้องรอ</div>
-      <div class="order-ref">หมายเลขออเดอร์: ${ref}</div>
-      <div class="wait-badge">⏰ รับวันที่ ${new Date(dt).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} เวลา ${tm}</div>
+      <div class="s-sub">เราจะเตรียมอาหารให้พร้อมก่อน ${time} น.<br>ขับมาถึงหยิบได้เลย ไม่ต้องรอ 🙌</div>
+      <div class="order-ref">รหัส: ${ref}</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:8px">ทะเบียน: ${plate.toUpperCase()}</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">เวลามาถึง: ${time} น. | ยอดรวม: ฿${total.toLocaleString()}</div>
       <button class="btn" onclick="liff.closeWindow()">กลับหน้าหลัก</button>
     </div>`;
 }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
 init();
 </script>
 </body>
