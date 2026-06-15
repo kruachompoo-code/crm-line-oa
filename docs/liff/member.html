@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมาชิก — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:30px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+/* Profile */
+.profile-card{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;border-radius:16px;padding:24px 20px;margin:16px;position:relative;overflow:hidden}
+.profile-card::before{content:'🦀';position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.1}
+.profile-avatar{width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,.3);margin-bottom:12px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:28px}
+.profile-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.profile-id{font-size:11px;opacity:.6;margin-bottom:12px}
+.tier-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:16px}
+.tier-bronze{background:rgba(180,83,9,.3);color:#fcd34d}
+.tier-silver{background:rgba(148,163,184,.3);color:#e2e8f0}
+.tier-gold{background:rgba(245,158,11,.3);color:#fef08a}
+.pts-row{display:flex;gap:16px}
+.pts-box{flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:12px;text-align:center}
+.pts-box .num{font-size:22px;font-weight:800}
+.pts-box .lbl{font-size:10px;opacity:.7;margin-top:2px}
+/* Progress */
+.tier-progress{margin-top:14px}
+.tier-labels{display:flex;justify-content:space-between;font-size:10px;opacity:.7;margin-bottom:6px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:10px;height:8px}
+.progress-fill{height:8px;border-radius:10px;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .6s}
+/* Stats */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat-box{background:#fff;border-radius:12px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-num{font-size:20px;font-weight:800;color:var(--blue)}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px}
+/* Form */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s}
+.field input:focus{border-color:var(--blue)}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--blue);color:var(--blue)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.section-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.history-item:last-child{border:none}
+.history-info .h-action{font-size:13px;font-weight:700;color:var(--text)}
+.history-info .h-date{font-size:11px;color:var(--sub);margin-top:2px}
+.h-pts{font-size:14px;font-weight:800;color:var(--green)}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>ข้อมูลสมาชิก</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+
+<script>
+const GAS_URL  = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+const LIFF_ID  = '2010373258-MEMBER01'; // ← เปลี่ยนเป็น LIFF ID จริง
+let profile = {}, member = null;
+
+const TIER_CONFIG = {
+  Bronze: { next: 'Silver', target: 500, color: 'tier-bronze', icon: '🥉' },
+  Silver: { next: 'Gold',   target: 2000, color: 'tier-silver', icon: '🥈' },
+  Gold:   { next: null,     target: null,  color: 'tier-gold',   icon: '🥇' }
+};
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    const res = await post({ type: 'member_view', lineUserId: profile.userId, displayName: profile.displayName });
+    member = res;
+    if (!member || !member.lineUserId) {
+      renderRegisterForm();
+    } else {
+      renderProfile();
+    }
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
+  }
+}
+
+function renderProfile() {
+  const tier = member.tier || 'Bronze';
+  const cfg  = TIER_CONFIG[tier];
+  const pts  = parseInt(member.points) || 0;
+  const ptsToNext = cfg.target ? Math.max(0, cfg.target - pts) : 0;
+  const pct  = cfg.target ? Math.min(100, Math.round((pts / cfg.target) * 100)) : 100;
+
+  document.getElementById('app').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-avatar">
+        ${member.pictureUrl ? `<img src="${member.pictureUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : '👤'}
+      </div>
+      <div class="profile-name">${member.displayName || profile.displayName}</div>
+      <div class="profile-id">สมาชิกตั้งแต่ ${formatDate(member.first_seen)}</div>
+      <div class="tier-badge ${cfg.color}">${cfg.icon} ${tier}</div>
+      <div class="pts-row">
+        <div class="pts-box"><div class="num">${pts.toLocaleString()}</div><div class="lbl">คะแนน</div></div>
+        <div class="pts-box"><div class="num">${parseInt(member.visit_count)||0}</div><div class="lbl">ครั้งที่มา</div></div>
+        <div class="pts-box"><div class="num">฿${(parseInt(member.total_spend)||0).toLocaleString()}</div><div class="lbl">ยอดสะสม</div></div>
+      </div>
+      ${cfg.next ? `
+      <div class="tier-progress">
+        <div class="tier-labels"><span>${tier}</span><span>อีก ${ptsToNext.toLocaleString()} แต้ม → ${cfg.next}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>` : '<div style="margin-top:12px;font-size:12px;opacity:.7">🏆 คุณอยู่ในระดับสูงสุดแล้ว!</div>'}
+    </div>
+
+    <div style="padding:0 16px">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num">${parseInt(member.visit_count)||0}</div><div class="stat-lbl">Walk-in</div></div>
+        <div class="stat-box"><div class="stat-num">${tier}</div><div class="stat-lbl">ระดับ</div></div>
+        <div class="stat-box"><div class="stat-num">${pts}</div><div class="stat-lbl">แต้มสะสม</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="section-title">⚙️ แก้ไขข้อมูล</div>
+      <div class="field"><label>เบอร์โทร</label>
+        <input id="phone" type="tel" placeholder="08x-xxx-xxxx" value="${member.phone||''}">
+      </div>
+      <div class="field"><label>อีเมล</label>
+        <input id="email" type="email" placeholder="email@example.com" value="${member.email||''}">
+      </div>
+      <div class="field"><label>วันเกิด</label>
+        <input id="birthday" type="date" value="${member.birthday||''}">
+      </div>
+      <button class="btn btn-blue" onclick="saveProfile()">💾 บันทึกข้อมูล</button>
+    </div>`;
+}
+
+function renderRegisterForm() {
+  document.getElementById('app').innerHTML = `
+    <div class="card" style="margin-top:16px">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:48px;margin-bottom:8px">🦀</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">สมัครสมาชิก</div>
+        <div style="font-size:13px;color:var(--sub);margin-top:4px">รับ 50 แต้มทันที!</div>
+      </div>
+      <div class="field"><label>ชื่อ (LINE)</label>
+        <input id="displayName" type="text" value="${profile.displayName||''}" readonly style="background:#f8fafc">
+      </div>
+      <div class="field"><label>เบอร์โทร <span style="color:#e74c3c">*</span></label>
+        <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="field"><label>อีเมล</label>
+        <input id="email" type="email" placeholder="email@example.com">
+      </div>
+      <div class="field"><label>วันเกิด (รับโปรวันเกิด!)</label>
+        <input id="birthday" type="date">
+      </div>
+      <button class="btn btn-blue" onclick="register()">✅ สมัครสมาชิก — รับ 50 แต้ม!</button>
+    </div>`;
+}
+
+async function register() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) { alert('กรุณาใส่เบอร์โทร'); return; }
+  const btn = document.querySelector('.btn');
+  btn.disabled = true; btn.textContent = 'กำลังสมัคร...';
+  const res = await post({
+    type: 'member_register',
+    lineUserId: profile.userId,
+    displayName: profile.displayName,
+    pictureUrl: profile.pictureUrl,
+    phone, email: document.getElementById('email').value,
+    birthday: document.getElementById('birthday').value
+  });
+  if (res.ok) { member = res.member; renderProfile(); }
+  else { btn.disabled = false; btn.textContent = '✅ สมัครสมาชิก'; alert('เกิดข้อผิดพลาด'); }
+}
+
+async function saveProfile() {
+  const btn = document.querySelector('.btn-blue');
+  btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  await post({
+    type: 'member_update',
+    lineUserId: profile.userId,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    birthday: document.getElementById('birthday').value
+  });
+  btn.disabled = false; btn.textContent = '✅ บันทึกแล้ว!';
+  setTimeout(() => { btn.textContent = '💾 บันทึกข้อมูล'; }, 2000);
+}
+
+async function post(data) {
+  const r = await fetch(GAS_URL, { method:'POST', body: JSON.stringify(data) });
+  return r.json();
+}
+
+function formatDate(str) {
+  if (!str) return 'ไม่ทราบ';
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+}
+
+init();
+</script>
+</body>
+</html>
