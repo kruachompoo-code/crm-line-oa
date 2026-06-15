@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แลกคะแนน — ครัวชมพู่ อ่างศิลา</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
+.topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
+.topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
+/* Points Banner */
+.pts-banner{background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;margin:16px;border-radius:16px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center}
+.pts-left .lbl{font-size:12px;opacity:.7}
+.pts-left .num{font-size:36px;font-weight:800;line-height:1.1}
+.pts-left .unit{font-size:13px;opacity:.7}
+.pts-icon{font-size:48px;opacity:.3}
+/* Reward cards */
+.section-title{font-size:15px;font-weight:800;color:var(--text);padding:4px 16px 12px;display:flex;align-items:center;gap:6px}
+.rewards-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+.reward-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);transition:.15s}
+.reward-card:active{transform:scale(.97)}
+.reward-img{height:100px;background:linear-gradient(135deg,var(--blue),var(--pink));display:flex;align-items:center;justify-content:center;font-size:48px}
+.reward-body{padding:12px}
+.reward-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px}
+.reward-desc{font-size:11px;color:var(--sub);margin-bottom:10px;line-height:1.4}
+.reward-pts{display:flex;align-items:center;justify-content:space-between}
+.pts-cost{font-size:14px;font-weight:800;color:var(--gold)}
+.redeem-btn{padding:6px 12px;background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.redeem-btn:disabled{opacity:.4;cursor:not-allowed}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--sub);margin-bottom:20px;line-height:1.5}
+.modal-icon{font-size:56px;text-align:center;margin-bottom:12px}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;transition:.15s}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--border);color:var(--sub)}
+.loading{text-align:center;padding:60px 20px;color:var(--sub)}
+.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:100px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:.3s;white-space:nowrap}
+.toast.show{opacity:1}
+.insufficient{filter:grayscale(.5);opacity:.7}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>แลกคะแนนรับรางวัล</p></div>
+<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- Modal confirm -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-icon" id="modal-icon"></div>
+    <h3 id="modal-title"></h3>
+    <p id="modal-desc"></p>
+    <button class="btn btn-blue" id="modal-confirm">✅ ยืนยันแลก</button>
+    <button class="btn btn-outline" onclick="hideModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
+const LIFF_ID = '2010373258-REDEEM01'; // ← เปลี่ยน LIFF ID จริง
+let profile = {}, userPoints = 0;
+
+const REWARDS = [
+  { id:'R001', name:'ส่วนลด 50 บาท',    desc:'ใช้ส่วนลด 50 บาทสำหรับบิลครั้งต่อไป', cost:100, icon:'🎟️',  type:'discount' },
+  { id:'R002', name:'เครื่องดื่มฟรี 1 แก้ว', desc:'รับเครื่องดื่มฟรี 1 แก้ว (มูลค่าไม่เกิน 80 บาท)', cost:150, icon:'🧋', type:'free_item' },
+  { id:'R003', name:'ส่วนลด 10%',        desc:'ลด 10% สำหรับออเดอร์ครั้งต่อไป (สูงสุด 200 บาท)', cost:200, icon:'💸', type:'discount' },
+  { id:'R004', name:'อาหารฟรี 1 จาน',   desc:'รับเมนูแนะนำฟรี 1 จาน (มูลค่าไม่เกิน 150 บาท)', cost:300, icon:'🍽️', type:'free_item' },
+  { id:'R005', name:'ชุดของขวัญ',        desc:'ของขวัญพิเศษจากร้าน (เซอร์ไพรส์!)', cost:500, icon:'🎁', type:'gift' },
+  { id:'R006', name:'โต๊ะ VIP 1 มื้อ',  desc:'จองโต๊ะ VIP ฟรี 1 มื้อ สำหรับ 2 ท่าน', cost:800, icon:'👑', type:'vip' },
+];
+
+let selectedReward = null;
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    profile = await liff.getProfile();
+    const res = await post({ type: 'member_view', lineUserId: profile.userId, displayName: profile.displayName });
+    userPoints = parseInt(res?.points) || 0;
+    render();
+  } catch(e) {
+    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด</p></div>';
+  }
+}
+
+function render() {
+  document.getElementById('app').innerHTML = `
+    <div class="pts-banner">
+      <div class="pts-left">
+        <div class="lbl">คะแนนสะสมของคุณ</div>
+        <div class="num">${userPoints.toLocaleString()}</div>
+        <div class="unit">แต้ม</div>
+      </div>
+      <div class="pts-icon">⭐</div>
+    </div>
+
+    <div class="section-title">🎁 รางวัลที่แลกได้</div>
+    <div class="rewards-grid">
+      ${REWARDS.map(r => {
+        const canRedeem = userPoints >= r.cost;
+        return `<div class="reward-card ${canRedeem?'':'insufficient'}">
+          <div class="reward-img">${r.icon}</div>
+          <div class="reward-body">
+            <div class="reward-name">${r.name}</div>
+            <div class="reward-desc">${r.desc}</div>
+            <div class="reward-pts">
+              <span class="pts-cost">⭐ ${r.cost}</span>
+              <button class="redeem-btn" ${canRedeem?'':'disabled'} onclick="confirmRedeem('${r.id}')">แลก</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function confirmRedeem(rewardId) {
+  selectedReward = REWARDS.find(r => r.id === rewardId);
+  if (!selectedReward) return;
+  document.getElementById('modal-icon').textContent = selectedReward.icon;
+  document.getElementById('modal-title').textContent = `แลก "${selectedReward.name}"?`;
+  document.getElementById('modal-desc').textContent = `ใช้ ${selectedReward.cost} แต้ม\nคงเหลือ ${(userPoints - selectedReward.cost).toLocaleString()} แต้ม\n\n${selectedReward.desc}`;
+  document.getElementById('modal-confirm').onclick = doRedeem;
+  document.getElementById('modal').classList.add('active');
+}
+
+async function doRedeem() {
+  const btn = document.getElementById('modal-confirm');
+  btn.disabled = true; btn.textContent = 'กำลังแลก...';
+  const res = await post({
+    type: 'redeem_request',
+    lineUserId: profile.userId,
+    displayName: profile.displayName,
+    rewardId: selectedReward.id,
+    rewardName: selectedReward.name,
+    pointsCost: selectedReward.cost
+  });
+  hideModal();
+  if (res.ok) {
+    userPoints = parseInt(res.newPoints) || Math.max(0, userPoints - selectedReward.cost);
+    showToast(`✅ แลก ${selectedReward.name} สำเร็จ!`);
+    render();
+  } else {
+    showToast('❌ ' + (res.error || 'เกิดข้อผิดพลาด'));
+  }
+}
+
+function hideModal() {
+  document.getElementById('modal').classList.remove('active');
+  selectedReward = null;
+  const btn = document.getElementById('modal-confirm');
+  btn.disabled = false; btn.textContent = '✅ ยืนยันแลก';
+}
+
+function closeModal(e) { if (e.target === e.currentTarget) hideModal(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function post(data) {
+  const r = await fetch(GAS_URL, { method:'POST', body: JSON.stringify(data) });
+  return r.json();
+}
+
+init();
+</script>
+</body>
+</html>
