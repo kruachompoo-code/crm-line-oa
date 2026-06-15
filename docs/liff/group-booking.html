@@ -2,171 +2,216 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>จองหมู่คณะ — ครัวชมพู่ อ่างศิลา</title>
+<title>จองโต๊ะกลุ่ม — ครัวชมพู่ อ่างศิลา</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--blue:#4dc8f4;--pink:#e6538d;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb}
+:root{--blue:#4dc8f4;--pink:#e6538d;--gold:#f59e0b;--bg:#f5f8ff;--text:#1a1a2e;--sub:#6b7280;--border:#e5e7eb;--green:#22c55e}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:30px}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);min-height:100vh;padding-bottom:40px}
 .topbar{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(77,200,244,.3)}
 .topbar h1{font-size:18px;font-weight:800}.topbar p{font-size:12px;opacity:.85;margin-top:2px}
 .card{background:#fff;border-radius:16px;padding:20px;margin:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.card h2{font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.card p{font-size:12px;color:var(--sub);margin-bottom:16px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
-.field label span{color:#e74c3c}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s;resize:none}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.section-label{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:10px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:.2s;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue)}
+.form-group textarea{resize:none;line-height:1.5}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.menu-opt{border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:.2s}
-.menu-opt.selected{border-color:var(--blue);background:#e8f9fe}
-.menu-opt .icon{font-size:28px;margin-bottom:4px}
-.menu-opt .name{font-size:13px;font-weight:700;color:var(--text)}
-.menu-opt .price{font-size:12px;color:var(--pink);font-weight:600}
+.pkg-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.pkg-card{border:2px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:12px}
+.pkg-card.selected{border-color:var(--blue);background:#f0fbff}
+.pkg-emoji{font-size:28px;flex-shrink:0}
+.pkg-info{flex:1}
+.pkg-name{font-size:14px;font-weight:800;color:var(--text)}
+.pkg-price{font-size:12px;color:var(--pink);font-weight:700;margin-top:2px}
+.pkg-desc{font-size:11px;color:var(--sub);margin-top:2px}
+.pkg-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+.pkg-card.selected .pkg-check{background:var(--blue);border-color:var(--blue);color:#fff}
+.summary-box{background:var(--bg);border-radius:12px;padding:14px;margin-bottom:16px}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:6px}
+.summary-row.total{font-size:15px;font-weight:800;color:var(--text);margin-top:8px;padding-top:8px;border-top:1.5px solid var(--border)}
 .btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s}
 .btn:active{transform:scale(.97)}
 .btn-blue{background:linear-gradient(135deg,var(--blue),#38b2d8);color:#fff}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.success{text-align:center;padding:40px 20px}
-.success-icon{font-size:80px;margin-bottom:16px}
-.success-title{font-size:22px;font-weight:800;color:var(--blue);margin-bottom:8px}
-.success-sub{font-size:14px;color:var(--sub);line-height:1.8}
-.booking-id{font-size:13px;background:var(--bg);border-radius:10px;padding:10px 16px;margin-top:12px;color:var(--sub)}
-.loading{text-align:center;padding:60px 20px;color:var(--sub)}
-.loader{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.success-screen{text-align:center;padding:40px 20px}
+.success-icon{font-size:72px;margin-bottom:16px;animation:pop .4s}
+@keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:24px}
+.booking-ref{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;border-radius:14px;padding:16px;font-size:18px;font-weight:800;margin-bottom:20px;letter-spacing:2px}
 </style>
 </head>
 <body>
-<div class="topbar"><h1>👥 ครัวชมพู่ อ่างศิลา</h1><p>จองหมู่คณะ / อีเวนต์</p></div>
-<div id="app"><div class="loading"><div class="loader"></div><p>กำลังโหลด...</p></div></div>
+<div class="topbar"><h1>🦀 ครัวชมพู่ อ่างศิลา</h1><p>จองโต๊ะกลุ่ม — Group Booking</p></div>
+<div id="app">
+  <div class="card" style="margin-top:16px">
+    <div class="section-label">📦 เลือกแพ็กเกจ</div>
+    <div class="pkg-list" id="pkg-list">
+      <div class="pkg-card" onclick="selectPkg(this,'PKG_BASIC',0)">
+        <div class="pkg-emoji">🍽️</div>
+        <div class="pkg-info">
+          <div class="pkg-name">Basic — สั่งจากเมนูปกติ</div>
+          <div class="pkg-price">ราคาตามออเดอร์</div>
+          <div class="pkg-desc">ไม่มีขั้นต่ำ เลือกได้อิสระ</div>
+        </div>
+        <div class="pkg-check">✓</div>
+      </div>
+      <div class="pkg-card" onclick="selectPkg(this,'PKG_A',399)">
+        <div class="pkg-emoji">🦐</div>
+        <div class="pkg-info">
+          <div class="pkg-name">แพ็กเกจ A — ทะเลสดพื้นฐาน</div>
+          <div class="pkg-price">399 บาท/ท่าน</div>
+          <div class="pkg-desc">กุ้ง ปลาหมึก หอย + ข้าว น้ำจิ้ม</div>
+        </div>
+        <div class="pkg-check">✓</div>
+      </div>
+      <div class="pkg-card" onclick="selectPkg(this,'PKG_B',599)">
+        <div class="pkg-emoji">🦞</div>
+        <div class="pkg-info">
+          <div class="pkg-name">แพ็กเกจ B — กุ้งแม่น้ำพรีเมียม</div>
+          <div class="pkg-price">599 บาท/ท่าน</div>
+          <div class="pkg-desc">กุ้งแม่น้ำ + ปูม้า + ของทะเลรวม</div>
+        </div>
+        <div class="pkg-check">✓</div>
+      </div>
+      <div class="pkg-card" onclick="selectPkg(this,'PKG_VIP',899)">
+        <div class="pkg-emoji">👑</div>
+        <div class="pkg-info">
+          <div class="pkg-name">แพ็กเกจ VIP — ซีฟู้ดหรู</div>
+          <div class="pkg-price">899 บาท/ท่าน</div>
+          <div class="pkg-desc">กุ้งมังกร + ปูทะเล + ปลาหิมะ + ไวน์</div>
+        </div>
+        <div class="pkg-check">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">👥 ข้อมูลการจอง</div>
+    <div class="form-group">
+      <label>ชื่อผู้จอง *</label>
+      <input type="text" id="name" placeholder="ชื่อ-นามสกุล" oninput="updateSummary()">
+    </div>
+    <div class="form-group">
+      <label>เบอร์โทรศัพท์ *</label>
+      <input type="tel" id="phone" placeholder="08x-xxx-xxxx" oninput="updateSummary()">
+    </div>
+    <div class="row2">
+      <div class="form-group">
+        <label>วันที่ *</label>
+        <input type="date" id="date" onchange="updateSummary()">
+      </div>
+      <div class="form-group">
+        <label>เวลา *</label>
+        <select id="time" onchange="updateSummary()">
+          <option value="">เลือกเวลา</option>
+          <option>11:00</option><option>11:30</option>
+          <option>12:00</option><option>12:30</option><option>13:00</option>
+          <option>17:00</option><option>17:30</option><option>18:00</option>
+          <option>18:30</option><option>19:00</option><option>19:30</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>จำนวนคน *</label>
+      <select id="guests" onchange="updateSummary()">
+        <option value="">เลือกจำนวน</option>
+        <option value="5">5 ท่าน</option><option value="6">6 ท่าน</option>
+        <option value="8">8 ท่าน</option><option value="10">10 ท่าน</option>
+        <option value="12">12 ท่าน</option><option value="15">15 ท่าน</option>
+        <option value="20">20 ท่าน</option><option value="25">25 ท่าน</option>
+        <option value="30">30+ ท่าน</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>หมายเหตุ / ความต้องการพิเศษ</label>
+      <textarea id="note" rows="3" placeholder="เช่น ต้องการแยกโต๊ะ / มีผู้สูงอายุ / จัดวันเกิด..."></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">💰 สรุปการจอง</div>
+    <div class="summary-box">
+      <div class="summary-row"><span>แพ็กเกจ</span><span id="s-pkg">—</span></div>
+      <div class="summary-row"><span>จำนวน</span><span id="s-guests">—</span></div>
+      <div class="summary-row total"><span>ประมาณการรวม</span><span id="s-total">—</span></div>
+    </div>
+    <button class="btn btn-blue" id="submit-btn" onclick="submitBooking()" disabled>
+      📅 ยืนยันการจอง
+    </button>
+  </div>
+</div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqfeB0x6LIYQY_cSnL5_VOqHKyG3WHDf1c5zQOUIizd3tn4CHC7_5jGi2IrcgZvEB10Q/exec';
-const LIFF_ID = '2010373258-yUWNKYoz';
-
-let profile = {};
-let selectedMenu = 'standard';
+const LIFF_ID = '2010373258-GBOOKING01';
+let profile = {}, selectedPkg = null, selectedPrice = 0;
+const PKG_NAMES = {
+  PKG_BASIC:'Basic (ตามเมนู)',PKG_A:'แพ็กเกจ A (399฿/ท่าน)',
+  PKG_B:'แพ็กเกจ B (599฿/ท่าน)',PKG_VIP:'แพ็กเกจ VIP (899฿/ท่าน)'
+};
 
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
     if (!liff.isLoggedIn()) { liff.login(); return; }
     profile = await liff.getProfile();
-    renderForm();
-  } catch(e) {
-    document.getElementById('app').innerHTML = '<div class="loading"><p>❌ เกิดข้อผิดพลาด กรุณาปิดแล้วเปิดใหม่</p></div>';
-  }
+  } catch(e) {}
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('date').min = d.toISOString().split('T')[0];
 }
 
-const menuOptions = [
-  { id:'standard', icon:'🍽', name:'เมนูมาตรฐาน', price:'฿350/ท่าน' },
-  { id:'premium',  icon:'🦀', name:'เมนู Premium', price:'฿550/ท่าน' },
-  { id:'seafood',  icon:'🦞', name:'ซีฟู้ดเต็มรูปแบบ', price:'฿750/ท่าน' },
-  { id:'custom',   icon:'✨', name:'กำหนดเอง', price:'ติดต่อทีม' },
-];
+function selectPkg(el, pkg, price) {
+  document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPkg = pkg; selectedPrice = price;
+  updateSummary();
+}
 
-function renderForm() {
-  const today = new Date().toISOString().split('T')[0];
+function updateSummary() {
+  const guests = parseInt(document.getElementById('guests').value)||0;
+  document.getElementById('s-pkg').textContent = selectedPkg ? PKG_NAMES[selectedPkg] : '—';
+  document.getElementById('s-guests').textContent = guests ? guests+' ท่าน' : '—';
+  document.getElementById('s-total').textContent = selectedPkg==='PKG_BASIC' ? 'ตามออเดอร์จริง'
+    : (selectedPkg && guests) ? '~'+(selectedPrice*guests).toLocaleString()+' บาท' : '—';
+  const ok = selectedPkg && document.getElementById('name').value.trim()
+    && document.getElementById('phone').value.trim()
+    && document.getElementById('date').value && document.getElementById('time').value && guests;
+  document.getElementById('submit-btn').disabled = !ok;
+}
+
+async function submitBooking() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('time').value;
+  const guests = document.getElementById('guests').value;
+  const note = document.getElementById('note').value.trim();
+  const res = await post({
+    type:'group_booking_create', lineUserId:profile.userId||'anonymous',
+    displayName:profile.displayName||name, name, phone, date, time,
+    guests:parseInt(guests), packageId:selectedPkg, packageName:PKG_NAMES[selectedPkg],
+    estimatedTotal:selectedPrice>0?selectedPrice*parseInt(guests):0, note
+  });
+  const ref = res?.bookingRef||'GB'+Date.now().toString().slice(-6);
   document.getElementById('app').innerHTML = `
-    <div class="card">
-      <h2>👥 จองหมู่คณะ</h2>
-      <p>เหมาะสำหรับกลุ่ม 10 ท่านขึ้นไป · งานเลี้ยง · สัมมนา · วันเกิด</p>
-      <div class="field"><label>บริษัท / ชื่อกลุ่ม <span>*</span></label>
-        <input id="company" type="text" placeholder="เช่น บริษัท ABC จำกัด">
-      </div>
-      <div class="row2">
-        <div class="field"><label>ชื่อผู้ติดต่อ <span>*</span></label>
-          <input id="contactName" type="text" placeholder="ชื่อ-นามสกุล" value="${profile.displayName || ''}">
-        </div>
-        <div class="field"><label>เบอร์โทร <span>*</span></label>
-          <input id="phone" type="tel" placeholder="08x-xxx-xxxx">
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field"><label>วันที่จัดงาน <span>*</span></label>
-          <input id="eventDate" type="date" min="${today}">
-        </div>
-        <div class="field"><label>จำนวนผู้เข้าร่วม <span>*</span></label>
-          <select id="guests">
-            <option value="10-20">10–20 ท่าน</option>
-            <option value="21-30">21–30 ท่าน</option>
-            <option value="31-50">31–50 ท่าน</option>
-            <option value="51-100">51–100 ท่าน</option>
-            <option value="100+">100+ ท่าน</option>
-          </select>
-        </div>
-      </div>
-      <div class="field"><label>เลือกเมนู <span>*</span></label>
-        <div class="menu-grid" id="menuGrid">
-          ${menuOptions.map(m=>`
-            <div class="menu-opt${m.id===selectedMenu?' selected':''}" onclick="selectMenu('${m.id}')">
-              <div class="icon">${m.icon}</div>
-              <div class="name">${m.name}</div>
-              <div class="price">${m.price}</div>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div class="field"><label>งบประมาณโดยประมาณ</label>
-        <input id="budget" type="text" placeholder="เช่น 30,000 บาท">
-      </div>
-      <div class="field"><label>รายละเอียดเพิ่มเติม</label>
-        <textarea id="notes" rows="3" placeholder="ความต้องการพิเศษ, ธีมงาน, อุปกรณ์ที่ต้องการ..."></textarea>
-      </div>
-      <button class="btn btn-blue" onclick="submit()">📋 ส่งใบจอง</button>
+    <div class="success-screen">
+      <div class="success-icon">📅</div>
+      <div class="success-title">จองโต๊ะสำเร็จ!</div>
+      <div class="success-sub">ทีมงานจะยืนยันกลับทาง LINE ภายใน 30 นาที</div>
+      <div class="booking-ref">รหัสจอง: ${ref}</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">${name} | ${guests} ท่าน<br>${date} เวลา ${time}</div>
+      <button class="btn btn-blue" onclick="liff.closeWindow()">ปิดหน้านี้</button>
     </div>`;
 }
 
-function selectMenu(id) {
-  selectedMenu = id;
-  document.querySelectorAll('.menu-opt').forEach(el => el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-}
-
-async function submit() {
-  const company     = document.getElementById('company').value.trim();
-  const contactName = document.getElementById('contactName').value.trim();
-  const phone       = document.getElementById('phone').value.trim();
-  const eventDate   = document.getElementById('eventDate').value;
-  if (!company || !contactName || !phone || !eventDate) { alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return; }
-  const btn = document.querySelector('.btn');
-  btn.disabled = true; btn.textContent = 'กำลังส่งข้อมูล...';
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'groupbooking',
-        lineUserId: profile.userId,
-        displayName: profile.displayName,
-        company, contactName, phone, eventDate,
-        guests: document.getElementById('guests').value,
-        menuType: menuOptions.find(m=>m.id===selectedMenu)?.name || selectedMenu,
-        budget: document.getElementById('budget').value,
-        notes: document.getElementById('notes').value,
-      }),
-    });
-    const data = await res.json();
-    renderSuccess(data.id, company, eventDate);
-  } catch(e) {
-    btn.disabled = false; btn.textContent = '📋 ส่งใบจอง';
-    alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
-  }
-}
-
-function renderSuccess(id, company, date) {
-  document.getElementById('app').innerHTML = `
-    <div class="success">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">ส่งใบจองสำเร็จ!</div>
-      <div class="success-sub">
-        ${company}<br>📅 ${date}<br>
-        ทีมงานจะติดต่อกลับภายใน 24 ชม.
-      </div>
-      <div class="booking-id">รหัส: ${id}</div>
-    </div>`;
+async function post(data) {
+  return fetch(GAS_URL,{method:'POST',body:JSON.stringify(data)}).then(r=>r.json()).catch(()=>({}));
 }
 
 init();
